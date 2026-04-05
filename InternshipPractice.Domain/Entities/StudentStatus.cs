@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace InternshipPractice.Infrastructure.Entities;
+﻿namespace InternshipPractice.Domain.Entities;
 
 public partial class StudentStatus
 {

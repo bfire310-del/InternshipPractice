@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using InternshipPractice.Infrastructure.Entities;
+﻿using InternshipPractice.Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace InternshipPractice.Infrastructure.Data;

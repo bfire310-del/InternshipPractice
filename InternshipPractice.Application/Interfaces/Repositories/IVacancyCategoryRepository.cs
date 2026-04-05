@@ -1,6 +1,6 @@
 ﻿using KDS.Primitives.FluentResult;
 
-namespace InternshipPractice.Domain.Interfaces.Repositories;
+namespace InternshipPractice.Application.Interfaces.Repositories;
 
 public interface IVacancyCategoryRepository
 {

@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace InternshipPractice.Infrastructure.Entities;
+﻿namespace InternshipPractice.Domain.Entities;
 
 public partial class Vacancy
 {
@@ -15,7 +12,7 @@ public partial class Vacancy
 
     public string? NameEn { get; set; }
 
-    public Guid? TypeOfEmploymentId { get; set; }
+    public Guid? TypeOfEmploymentId { get; set; } // фулл тайм, парт тайм
 
     public Guid? PracticeFormId { get; set; }
 

@@ -1,5 +1,4 @@
 ﻿using InternshipPractice.Application.Queries.GetVacancyCategoryNameList;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InternshipPractice.Api.Controllers;
@@ -8,7 +7,7 @@ namespace InternshipPractice.Api.Controllers;
 [ApiController]
 public class VacancyCategoryController : BaseController
 {
-    [HttpGet]
+    [HttpGet("names")]
     public async Task<IActionResult> GetVacancyCategoryNames(string lang)
     {
         var result = await Mediator.Send(new GetVacancyCategoryNameListQuery(lang));
