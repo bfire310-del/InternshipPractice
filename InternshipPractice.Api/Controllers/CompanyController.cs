@@ -1,4 +1,5 @@
-﻿using InternshipPractice.Application.Queries.GetCompanyCount;
+﻿using InternshipPractice.Application.Queries.GetAllCompanies;
+using InternshipPractice.Application.Queries.GetCompanyCount;
 using InternshipPractice.Application.Queries.GetCompanyNameList;
 using Microsoft.AspNetCore.Mvc;
 
@@ -23,6 +24,17 @@ public class CompanyController : BaseController
     public async Task<IActionResult> GetCompanyCount()
     {
         var result = await Mediator.Send(new GetCompanyCountQuery());
+
+        if (result.IsFailed)
+            return ProblemResponse(result.Error);
+
+        return Ok(result.Value);
+    }
+
+    [HttpGet("all")]
+    public async Task<IActionResult> GetAllCompanies()
+    {
+        var result = await Mediator.Send(new GetAllCompaniesQuery());
 
         if (result.IsFailed)
             return ProblemResponse(result.Error);

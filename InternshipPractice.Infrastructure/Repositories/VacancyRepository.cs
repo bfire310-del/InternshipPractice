@@ -97,4 +97,74 @@ public class VacancyRepository(InternshipPracticeDbContext dbContext): IVacancyR
             new Error(Domain.Common.Error.InternalServerError, ex.Message));
     }
     }
+
+    public async Task<Result<List<VacancySearchResponse>>> GetVacancyByLikeWord(string word)
+    {
+        try
+        {
+            var result = await dbContext.Vacancies
+                .Where(v => v.NameEn.Contains(word)
+                || v.NameRu.Contains(word)
+                || v.NameKk.Contains(word))
+                .Select(s => new VacancySearchResponse
+                {
+                    Title = s.JobTitle,
+                    ShortDescription = s.ShortDescription,
+                    RegionName = s.Region.NameRu,
+                    Payment = s.Payment,
+                    CreatedAt = s.CreatedAt
+                })
+                .ToListAsync();
+
+            return result;
+        }
+        catch(Exception ex)
+        {
+            return Result.Failure<List<VacancySearchResponse>>(
+            new Error(Domain.Common.Error.InternalServerError, ex.Message));
+        }
+    }
+
+    public async Task<Result<int>> GetActiveVacanciesCountByCompanyId(Guid companyId)
+    {
+        try
+        {
+            var count = await dbContext.Companies
+                .Where(c => c.CompanyId == companyId)
+                .Select(s => s.Region.Vacancies)
+                .CountAsync();
+
+            return count;    
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<int>(
+            new Error(Domain.Common.Error.InternalServerError, ex.Message));
+        }
+    }
+
+    public async Task<Result<List<VacancySearchResponse>>> GetVacanciesByEmployerId(Guid employerId)
+    {
+        try
+        {
+            var result = await dbContext.Vacancies
+                .Where(v=> v.EmployerId == employerId)
+                .Select(s => new VacancySearchResponse
+                {
+                    Title = s.JobTitle,
+                    ShortDescription = s.ShortDescription,
+                    RegionName = s.Region.NameRu,
+                    Payment = s.Payment,
+                    CreatedAt = s.CreatedAt
+                })
+                .ToListAsync();
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<List<VacancySearchResponse>>(
+            new Error(Domain.Common.Error.InternalServerError, ex.Message));
+        }
+    }
 }
