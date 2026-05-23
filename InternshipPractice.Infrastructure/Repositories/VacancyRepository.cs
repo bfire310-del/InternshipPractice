@@ -1,4 +1,5 @@
-﻿using InternshipPractice.Application.Interfaces.Repositories;
+﻿using InternshipPractice.Application.Helpers;
+using InternshipPractice.Application.Interfaces.Repositories;
 using InternshipPractice.Application.Responses;
 using InternshipPractice.Infrastructure.Data;
 using KDS.Primitives.FluentResult;
@@ -184,7 +185,7 @@ public class VacancyRepository(InternshipPracticeDbContext dbContext): IVacancyR
                         ? v.RegionNameEn ?? v.RegionNameRu
                         : v.RegionNameRu,
 
-                Duration = CalculateDurationText(v.StartDate, v.EndDate),
+                Duration = DurationHelper.CalculateDurationText(v.StartDate, v.EndDate),
 
                 PaymentType = lang == "kk"
                     ? v.PaymentTypeNameKk ?? v.PaymentTypeNameRu
@@ -293,42 +294,85 @@ public class VacancyRepository(InternshipPracticeDbContext dbContext): IVacancyR
             new Error(Domain.Common.Error.InternalServerError, ex.Message));
         }
     }
-    
-    private static string? CalculateDurationText(DateOnly? startDate, DateOnly? endDate)
+
+    public async Task<Result<VacancyDetailResponse>> GetVacancyDetailsById(Guid id)
     {
-        if (startDate is null || endDate is null)
-            return null;
+        try
+        {
+            var vacancy = await dbContext.Vacancies
+                .AsNoTracking()
+                .Where(v =>
+                    v.DeletedAt == null &&
+                    v.Status != null &&
+                    v.Status.Code == "active" &&
+                    v.VacancyId == id)
+                .Select(v => new VacancyDetailResponse
+                {
+                    VacancyId = v.VacancyId,
 
-        if (endDate < startDate)
-            return null;
+                    JobTitle = v.JobTitle ?? "",
 
-        var months = (endDate.Value.Year - startDate.Value.Year) * 12
-            + endDate.Value.Month - startDate.Value.Month;
+                    Status = v.Status != null
+                        ? v.Status.NameRu
+                        : null,
 
-        if (endDate.Value.Day < startDate.Value.Day)
-            months--;
+                    CompanyName = v.Employer != null && v.Employer.Company != null
+                        ? v.Employer.Company.CompanyNameRu
+                        : null,
 
-        if (months <= 0)
-            return "До 1 месяца";
+                    CategoryName = v.Category != null
+                        ? v.Category.NameRu
+                        : null,
 
-        if (months == 1)
-            return "1 месяц";
+                    WorkFormatName = v.WorkFormat != null
+                        ? v.WorkFormat.NameRu
+                        : null,
 
-        if (months is >= 2 and <= 4)
-            return $"{months} месяца";
+                    ShortDescription = v.ShortDescription,
+                    
+                    FullDescription = v.FullDescription,
 
-        if (months is >= 5 and <= 11)
-            return $"{months} месяцев";
+                    Requirements = v.Requirements,
 
-        var years = months / 12;
-        var restMonths = months % 12;
+                    RegionName = v.Region != null
+                        ? v.Region.NameRu
+                        : null,
 
-        if (years == 1 && restMonths == 0)
-            return "1 год";
+                    Duration = DurationHelper.CalculateDurationText(v.StartDate, v.EndDate),
 
-        if (restMonths == 0)
-            return $"{years} года";
+                    PaymentType = v.PaymentType != null
+                        ? v.PaymentType.NameRu
+                        : null,
 
-        return $"{years} г. {restMonths} мес.";
+                    TypeOfEmployment = v.TypeOfEmployment != null
+                        ? v.TypeOfEmployment.NameRu
+                        : null,
+                    
+                    CreatedAt = v.CreatedAt,
+                    
+                    Skills = v.VacancySkillMaps
+                        .Where(x => x.DeletedAt == null)
+                        .Select(x => x.Skill.NameRu!)
+                        .ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            if (vacancy is null)
+            {
+                return Result.Failure<VacancyDetailResponse>(
+                    new Error(
+                        Domain.Common.Error.NotFound,
+                        "Вакансия не найдена"));
+            }
+
+            return vacancy;
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<VacancyDetailResponse>(
+                new Error(
+                    Domain.Common.Error.InternalServerError,
+                    ex.Message));
+        }
     }
 }

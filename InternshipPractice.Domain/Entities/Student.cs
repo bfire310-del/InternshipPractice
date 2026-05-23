@@ -37,4 +37,5 @@ public partial class Student
     public virtual ICollection<StudentSkillMap> StudentSkillMaps { get; set; } = new List<StudentSkillMap>();
 
     public virtual User User { get; set; } = null!;
+    public virtual ICollection<Application> Applications { get; set; } = new List<Application>();
 }

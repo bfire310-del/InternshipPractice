@@ -30,6 +30,7 @@ public static class ServiceCollection
         services.AddScoped<IPaymentTypeRepository, PaymentTypeRepository>();
         services.AddScoped<IStudentRepository, StudentRepository>();
         services.AddScoped<IUsersRepository, UsersRepository>();
+        services.AddScoped<IApplicationRepository, ApplicationRepository>();
         services.Configure<JwtOptions>(configuration.GetSection("JwtSettings"));
         services.AddScoped<IJwtService, JwtService>();
         return services;

@@ -67,7 +67,7 @@ public partial class Vacancy
     public virtual Region? Region { get; set; }
 
     public virtual VacancyStatus? Status { get; set; }
-
+    public virtual ICollection<VacancySkillMap> VacancySkillMaps { get; set; } = new List<VacancySkillMap>();
     public virtual ICollection<StudentAssesment> StudentAssesments { get; set; } = new List<StudentAssesment>();
 
     public virtual TypeOfEmployment? TypeOfEmployment { get; set; }
@@ -75,4 +75,5 @@ public partial class Vacancy
     public virtual ICollection<VacancyDocument> VacancyDocuments { get; set; } = new List<VacancyDocument>();
 
     public virtual WorkFormat? WorkFormat { get; set; }
+    public virtual ICollection<Application> Applications { get; set; } = new List<Application>();
 }

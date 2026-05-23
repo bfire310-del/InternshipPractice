@@ -5,6 +5,7 @@ using InternshipPractice.Application.Queries.GetVacanciesByEmployerId;
 using InternshipPractice.Application.Queries.GetVacancyByLikeWord;
 using InternshipPractice.Application.Queries.GetVacancyCount;
 using InternshipPractice.Application.Queries.GetVacancyCountNew;
+using InternshipPractice.Application.Queries.GetVacancyDetailsById;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InternshipPractice.Api.Controllers;
@@ -55,6 +56,17 @@ public class VacancyController : BaseController
         return Ok(result.Value);
     }
 
+    [HttpGet("details")]
+    public async Task<IActionResult> GetVacancyDetailsById(Guid id)
+    {
+        var result = await Mediator.Send(new GetVacancyDetailsByIdQuery(id));
+
+        if (result.IsFailed)
+            return ProblemResponse(result.Error);
+
+        return Ok(result.Value);
+    }
+    
     [HttpGet("like-word")]
     public async Task<IActionResult> GetVacancyByLikeWord(string word)
     {
