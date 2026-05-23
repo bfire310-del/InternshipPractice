@@ -16,6 +16,10 @@ public class AccessController : BaseController
         if (result.IsFailed)
             return ProblemResponse(result.Error);
 
-        return Ok(result.Value);
+        return Ok(new
+        {
+            token = result.Value.Item1,
+            roleCode = result.Value.Item2
+        });
     }
 }
