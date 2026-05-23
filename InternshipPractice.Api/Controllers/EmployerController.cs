@@ -7,6 +7,7 @@ namespace InternshipPractice.Api.Controllers;
 [ApiController]
 public class EmployerController : BaseController
 {
+    
     [HttpGet("count")]
     public async Task<IActionResult> GetEmployerCount()
     {

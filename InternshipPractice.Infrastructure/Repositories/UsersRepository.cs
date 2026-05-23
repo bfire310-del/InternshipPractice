@@ -40,6 +40,7 @@ public class UsersRepository(InternshipPracticeDbContext dbContext): IUsersRepos
         {
             var result = await dbContext.Users
                 .Where(u => u.Email.Equals(email) && u.PasswordHash.Equals(password))
+                .Include(u=>u.Role)
                 .FirstAsync();
             return result;
         }
