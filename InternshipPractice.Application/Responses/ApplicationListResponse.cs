@@ -9,6 +9,7 @@ public class ApplicationListResponse
     public string JobTitle { get; init; } = "";
 
     public string? Status { get; init; }
+    public string? StatusCode { get; init; }
 
     public string? CompanyName { get; init; }
 
@@ -29,4 +30,6 @@ public class ApplicationListResponse
     public string? TypeOfEmployment { get; init; }
 
     public DateTime? CreatedAt { get; init; }
+    public bool CanWithdraw { get; init; }
+    public bool CanSignContract { get; init; }
 }

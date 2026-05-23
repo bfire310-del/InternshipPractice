@@ -16,9 +16,10 @@ public interface IVacancyRepository
         string lang,
         int page,
         int pageSize,
+        Guid userId,
         CancellationToken ct);
     Task<Result<List<VacancySearchResponse>>> GetVacancyByLikeWord(string word);
     Task<Result<int>> GetActiveVacanciesCountByCompanyId(Guid companyId);
     Task<Result<List<VacancySearchResponse>>> GetVacanciesByEmployerId(Guid employerId);
-    Task<Result<VacancyDetailResponse>> GetVacancyDetailsById(Guid id);
+    Task<Result<VacancyDetailResponse>> GetVacancyDetailsById(Guid id, Guid userId);
 }

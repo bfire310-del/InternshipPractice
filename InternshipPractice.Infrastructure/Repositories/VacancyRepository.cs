@@ -44,10 +44,16 @@ public class VacancyRepository(InternshipPracticeDbContext dbContext): IVacancyR
         string lang,
         int page,
         int pageSize,
+        Guid userId,
         CancellationToken ct)
     {
         try
         {
+            var studentId = await dbContext.Students
+                .Where(s => s.UserId == userId && s.DeletedAt == null)
+                .Select(s => (Guid?)s.StudentId)
+                .FirstOrDefaultAsync(ct);
+            
             var q = dbContext.Vacancies
                 .AsNoTracking()
                 .Where(v => v.DeletedAt == null && v.Status != null && v.Status.Code == "active");
@@ -205,6 +211,13 @@ public class VacancyRepository(InternshipPracticeDbContext dbContext): IVacancyR
                         ? v.StatusNameEn ?? v.StatusNameRu
                         : v.StatusNameRu,
 
+                HasApplied = studentId != null &&
+                             dbContext.Applications.Any(a =>
+                                 a.StudentId == studentId &&
+                                 a.VacancyId == v.VacancyId &&
+                                 a.DeletedAt == null &&
+                                 a.ApplicationStatus.Code != "withdrawn"),
+                
                 CreatedAt = v.CreatedAt
             }).ToList();
 
@@ -295,10 +308,15 @@ public class VacancyRepository(InternshipPracticeDbContext dbContext): IVacancyR
         }
     }
 
-    public async Task<Result<VacancyDetailResponse>> GetVacancyDetailsById(Guid id)
+    public async Task<Result<VacancyDetailResponse>> GetVacancyDetailsById(Guid id, Guid userId)
     {
         try
         {
+            var studentId = await dbContext.Students
+                .Where(s => s.UserId == userId && s.DeletedAt == null)
+                .Select(s => (Guid?)s.StudentId)
+                .FirstOrDefaultAsync();
+
             var vacancy = await dbContext.Vacancies
                 .AsNoTracking()
                 .Where(v =>
@@ -347,6 +365,13 @@ public class VacancyRepository(InternshipPracticeDbContext dbContext): IVacancyR
                     TypeOfEmployment = v.TypeOfEmployment != null
                         ? v.TypeOfEmployment.NameRu
                         : null,
+                    
+                    HasApplied = studentId != null &&
+                                 dbContext.Applications.Any(a =>
+                                     a.StudentId == studentId &&
+                                     a.VacancyId == v.VacancyId &&
+                                     a.DeletedAt == null &&
+                                     a.ApplicationStatus.Code != "withdrawn"),
                     
                     CreatedAt = v.CreatedAt,
                     

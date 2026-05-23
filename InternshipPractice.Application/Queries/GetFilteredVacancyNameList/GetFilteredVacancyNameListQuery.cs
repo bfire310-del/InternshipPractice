@@ -12,5 +12,6 @@ public record GetFilteredVacancyNameListQuery(
     Guid? CategoryId,
     string Lang,
     int Page,
-    int PageSize
+    int PageSize,
+    Guid UserId
 ) : IRequest<Result<PagedResult<VacancySearchResponse>>>;

@@ -15,4 +15,5 @@ public class VacancySearchResponse
     public string? PaymentType { get; init; }
     public string? TypeOfEmployment { get; init; }
     public DateTime? CreatedAt { get; init; } 
+    public bool HasApplied { get; init; }
 }

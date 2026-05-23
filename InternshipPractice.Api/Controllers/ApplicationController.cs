@@ -32,14 +32,15 @@ public class ApplicationController : BaseController
     }
     
     [HttpGet("by-status")]
-    public async Task<IActionResult> GetApplicationsByStatus([FromQuery] string? statusCode, [FromQuery] string lang = "ru")
+    public async Task<IActionResult> GetApplicationsByStatus([FromQuery] string? statusCode, [FromQuery] string lang = "ru",
+        [FromQuery] int page = 1, [FromQuery] int pageSize = 5)
     {
         var userIdValue = User.FindFirstValue("UserId");
 
         if (!Guid.TryParse(userIdValue, out var userId))
             return Unauthorized();
 
-        var result = await Mediator.Send(new GetApplicationsByStatusQuery(userId, statusCode, lang));
+        var result = await Mediator.Send(new GetApplicationsByStatusQuery(userId, statusCode, lang, page,  pageSize));
 
         if (result.IsFailed)
             return ProblemResponse(result.Error);

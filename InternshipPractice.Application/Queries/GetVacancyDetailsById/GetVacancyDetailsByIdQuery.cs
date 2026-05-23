@@ -4,4 +4,4 @@ using MediatR;
 
 namespace InternshipPractice.Application.Queries.GetVacancyDetailsById;
 
-public record GetVacancyDetailsByIdQuery(Guid Id):IRequest<Result<VacancyDetailResponse>>;
+public record GetVacancyDetailsByIdQuery(Guid Id, Guid UserId):IRequest<Result<VacancyDetailResponse>>;
