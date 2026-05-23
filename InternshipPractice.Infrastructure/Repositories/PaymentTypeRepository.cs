@@ -6,39 +6,39 @@ using Microsoft.EntityFrameworkCore;
 
 namespace InternshipPractice.Infrastructure.Repositories;
 
-public class VacancyCategoryRepository(InternshipPracticeDbContext dbContext): IVacancyCategoryRepository
+public class PaymentTypeRepository(InternshipPracticeDbContext dbContext): IPaymentTypeRepository
 {
-    public async Task<Result<List<NameDto>>> GetVacancyCategoryNameDtoList(string lang)
+    public async Task<Result<List<NameDto>>> GetPaymentTypeNameDtoList(string lang)
     {
         try
         {
             IQueryable<NameDto> query = lang switch
             {
-                "kk" => dbContext.VacancyCategories
+                "kk" => dbContext.PaymentTypes
                     .Select(vc => new NameDto
                     {
-                        Id = vc.VacancyCategoryId,
+                        Id = vc.PaymentTypeId,
                         Name = vc.NameKk
                     }),
 
-                "ru" => dbContext.VacancyCategories
+                "ru" => dbContext.PaymentTypes
                     .Select(vc => new NameDto
                     {
-                        Id = vc.VacancyCategoryId,
+                        Id = vc.PaymentTypeId,
                         Name = vc.NameRu
                     }),
 
-                "en" => dbContext.VacancyCategories
+                "en" => dbContext.PaymentTypes
                     .Select(vc => new NameDto
                     {
-                        Id = vc.VacancyCategoryId,
+                        Id = vc.PaymentTypeId,
                         Name = vc.NameEn
                     }),
 
-                _ => dbContext.VacancyCategories
+                _ => dbContext.PaymentTypes
                     .Select(vc => new NameDto
                     {
-                        Id = vc.VacancyCategoryId,
+                        Id = vc.PaymentTypeId,
                         Name = vc.NameRu
                     })
             };
@@ -47,7 +47,7 @@ public class VacancyCategoryRepository(InternshipPracticeDbContext dbContext): I
         }
         catch (Exception ex)
         {
-            return Result.Failure<List<NameDto>>(new Error(Domain.Common.Error.InternalServerError, $"Ошибка при получении названий категорий практик: {ex.Message}"));
+            return Result.Failure<List<NameDto>>(new Error(Domain.Common.Error.InternalServerError, $"Ошибка при получении названий типов оплаты: {ex.Message}"));
         }
     }
 }

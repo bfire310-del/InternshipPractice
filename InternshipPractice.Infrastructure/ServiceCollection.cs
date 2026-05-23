@@ -24,6 +24,7 @@ public static class ServiceCollection
         services.AddScoped<ICompanyRepository, CompanyRepository>();
         services.AddScoped<IEmployerRepository, EmployerRepository>();
         services.AddScoped<IRegionRepository, RegionRepository>();
+        services.AddScoped<IPaymentTypeRepository, PaymentTypeRepository>();
         services.AddScoped<IStudentRepository, StudentRepository>();
         services.AddScoped<IUsersRepository, UsersRepository>();
         return services;

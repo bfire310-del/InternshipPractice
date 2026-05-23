@@ -1,4 +1,4 @@
-﻿namespace InternshipPractice.Api.Responses;
+﻿namespace InternshipPractice.Application.Responses;
 
 public class PagedResult<T>
 {

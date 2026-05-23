@@ -3,8 +3,7 @@ using KDS.Primitives.FluentResult;
 
 namespace InternshipPractice.Application.Interfaces.Repositories;
 
-public interface IRegionRepository
+public interface IPaymentTypeRepository
 {
-    Task<Result<int>> GetRegionCount();
-    Task<Result<List<NameDto>>> GetRegionNameDtoList(string lang);
+    Task<Result<List<NameDto>>> GetPaymentTypeNameDtoList(string lang);
 }

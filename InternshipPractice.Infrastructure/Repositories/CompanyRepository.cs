@@ -1,10 +1,8 @@
-﻿using InternshipPractice.Api.Responses;
-using InternshipPractice.Application.Interfaces.Repositories;
+﻿using InternshipPractice.Application.Interfaces.Repositories;
 using InternshipPractice.Application.Responses;
 using InternshipPractice.Infrastructure.Data;
 using KDS.Primitives.FluentResult;
 using Microsoft.EntityFrameworkCore;
-using System.Runtime.InteropServices;
 
 namespace InternshipPractice.Infrastructure.Repositories;
 

@@ -1,4 +1,4 @@
-﻿using InternshipPractice.Application.Queries.GetVacancyCategoryNameList;
+﻿using InternshipPractice.Application.Queries.GetVacancyCategoryNameDtoList;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -11,7 +11,7 @@ public static class ServiceCollection
     {
         services.AddMediatR(cfg =>
         {
-            cfg.RegisterServicesFromAssembly(typeof(GetVacancyCategoryNameListQuery).Assembly);
+            cfg.RegisterServicesFromAssembly(typeof(GetVacancyCategoryNameDtoListQuery).Assembly);
         });
         return services;
     }

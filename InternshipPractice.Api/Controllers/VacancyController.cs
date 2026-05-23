@@ -42,15 +42,9 @@ public class VacancyController : BaseController
         var result = await Mediator.Send(new GetFilteredVacancyNameListQuery(
             request.Query,
             request.RegionId,
+            request.PaymentTypeId,
+            request.DurationCode,
             request.CategoryId,
-            request.WorkFormatId,
-            request.PracticeFormId,
-            request.TypeOfEmploymentId,
-            request.Course,
-            request.OnlyPublished ?? true,
-            request.OnlyPaid,
-            request.DurationMonthsMin,
-            request.DurationMonthsMax,
             request.Lang,
             request.Page,
             request.PageSize));

@@ -1,5 +1,5 @@
-﻿using InternshipPractice.Api.Responses;
-using InternshipPractice.Application.Interfaces.Repositories;
+﻿using InternshipPractice.Application.Interfaces.Repositories;
+using InternshipPractice.Application.Responses;
 using KDS.Primitives.FluentResult;
 using MediatR;
 

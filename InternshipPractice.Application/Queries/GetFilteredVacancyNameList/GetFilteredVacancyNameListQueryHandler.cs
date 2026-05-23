@@ -1,5 +1,5 @@
-﻿using InternshipPractice.Api.Responses;
-using InternshipPractice.Application.Interfaces.Repositories;
+﻿using InternshipPractice.Application.Interfaces.Repositories;
+using InternshipPractice.Application.Responses;
 using KDS.Primitives.FluentResult;
 using MediatR;
 
@@ -11,15 +11,9 @@ public class GetFilteredVacancyNameListQueryHandler(IVacancyRepository vacancyRe
     {
         var result = await vacancyRepository.GetFilteredVacancyNamesAsync(request.Query,
             request.RegionId,
+            request.PaymentTypeId,
+            request.DurationCode,
             request.CategoryId,
-            request.WorkFormatId,
-            request.PracticeFormId,
-            request.TypeOfEmploymentId,
-            request.Course,
-            request.OnlyPublished,
-            request.OnlyPaid,
-            request.DurationMonthsMin,
-            request.DurationMonthsMax,
             request.Lang,
             request.Page,
             request.PageSize,

@@ -1,4 +1,4 @@
-﻿using InternshipPractice.Api.Responses;
+﻿using InternshipPractice.Application.Responses;
 using KDS.Primitives.FluentResult;
 using MediatR;
 

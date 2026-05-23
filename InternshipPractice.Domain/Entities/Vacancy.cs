@@ -24,7 +24,7 @@ public partial class Vacancy
 
     public int? Course { get; set; }
 
-    public string? Payment { get; set; }
+    public Guid? PaymentTypeId { get; set; }
 
     public string? ShortDescription { get; set; }
 
@@ -57,10 +57,12 @@ public partial class Vacancy
     public DateTime? DeletedAt { get; set; }
 
     public Guid? DeletedBy { get; set; }
+    public virtual Employer? Employer { get; set; }
 
     public virtual VacancyCategory? Category { get; set; }
 
     public virtual PracticeForm? PracticeForm { get; set; }
+    public virtual PaymentType? PaymentType { get; set; }
 
     public virtual Region? Region { get; set; }
 

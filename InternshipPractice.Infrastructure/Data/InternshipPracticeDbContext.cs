@@ -31,6 +31,7 @@ public partial class InternshipPracticeDbContext : DbContext
     public virtual DbSet<Log> Logs { get; set; }
 
     public virtual DbSet<PracticeForm> PracticeForms { get; set; }
+    public virtual DbSet<PaymentType> PaymentTypes { get; set; }
 
     public virtual DbSet<Region> Regions { get; set; }
 
@@ -886,9 +887,7 @@ public partial class InternshipPracticeDbContext : DbContext
                 .HasMaxLength(150)
                 .HasColumnName("name_ru");
             entity.Property(e => e.NeccessaryTasks).HasColumnName("neccessary_tasks");
-            entity.Property(e => e.Payment)
-                .HasMaxLength(150)
-                .HasColumnName("payment");
+            entity.Property(e => e.PaymentTypeId).HasColumnName("payment_type_id");
             entity.Property(e => e.PracticeFormId).HasColumnName("practice_form_id");
             entity.Property(e => e.RegionId).HasColumnName("region_id");
             entity.Property(e => e.Requirements).HasColumnName("requirements");
@@ -909,6 +908,10 @@ public partial class InternshipPracticeDbContext : DbContext
             entity.HasOne(d => d.PracticeForm).WithMany(p => p.Vacancies)
                 .HasForeignKey(d => d.PracticeFormId)
                 .HasConstraintName("fk_vacancies_practice_form");
+            
+            entity.HasOne(d => d.PaymentType).WithMany(p => p.Vacancies)
+                .HasForeignKey(d => d.PaymentTypeId)
+                .HasConstraintName("fk_vacancies_payment_type");
 
             entity.HasOne(d => d.Region).WithMany(p => p.Vacancies)
                 .HasForeignKey(d => d.RegionId)
@@ -956,6 +959,40 @@ public partial class InternshipPracticeDbContext : DbContext
             entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
         });
 
+        modelBuilder.Entity<PaymentType>(entity =>
+        {
+            entity.HasKey(e => e.PaymentTypeId).HasName("payment_types_pkey");
+
+            entity.ToTable("payment_types");
+
+            entity.Property(e => e.PaymentTypeId)
+                .ValueGeneratedNever()
+                .HasColumnName("payment_type_id");
+
+            entity.Property(e => e.NameRu)
+                .HasMaxLength(150)
+                .HasColumnName("name_ru");
+
+            entity.Property(e => e.NameKk)
+                .HasMaxLength(150)
+                .HasColumnName("name_kk");
+
+            entity.Property(e => e.NameEn)
+                .HasMaxLength(150)
+                .HasColumnName("name_en");
+
+            entity.Property(e => e.DescriptionRu).HasColumnName("description_ru");
+            entity.Property(e => e.DescriptionKk).HasColumnName("description_kk");
+            entity.Property(e => e.DescriptionEn).HasColumnName("description_en");
+
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+            entity.Property(e => e.DeletedAt).HasColumnName("deleted_at");
+            entity.Property(e => e.DeletedBy).HasColumnName("deleted_by");
+        });
+        
         modelBuilder.Entity<VacancyDocument>(entity =>
         {
             entity.HasKey(e => e.VacancyDocumentId).HasName("vacancy_documents_pkey");

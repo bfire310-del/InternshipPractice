@@ -1,4 +1,4 @@
-﻿using InternshipPractice.Api.Responses;
+﻿using InternshipPractice.Application.Responses;
 using KDS.Primitives.FluentResult;
 using MediatR;
 
@@ -7,15 +7,9 @@ namespace InternshipPractice.Application.Queries.GetFilteredVacancyNameList;
 public record GetFilteredVacancyNameListQuery(
     string? Query,
     Guid? RegionId,
+    Guid? PaymentTypeId,
+    string? DurationCode,
     Guid? CategoryId,
-    Guid? WorkFormatId,
-    Guid? PracticeFormId,
-    Guid? TypeOfEmploymentId,
-    int? Course,
-    bool OnlyPublished,
-    bool? OnlyPaid,
-    int? DurationMonthsMin,
-    int? DurationMonthsMax,
     string Lang,
     int Page,
     int PageSize
