@@ -71,6 +71,9 @@ public partial class InternshipPracticeDbContext : DbContext
     public virtual DbSet<VacancySkillMap> VacancySkillMaps { get; set; }
 
     public virtual DbSet<WorkFormat> WorkFormats { get; set; }
+    
+    public virtual DbSet<Domain.Entities.Application> Applications { get; set; }
+    public virtual DbSet<ApplicationStatus> ApplicationStatuses { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -1118,6 +1121,93 @@ public partial class InternshipPracticeDbContext : DbContext
                 .HasColumnName("name_ru");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
             entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+        });
+        
+        modelBuilder.Entity<ApplicationStatus>(entity =>
+        {
+            entity.HasKey(e => e.ApplicationStatusId)
+                .HasName("application_statuses_pkey");
+
+            entity.ToTable("application_statuses");
+
+            entity.HasIndex(e => e.Code)
+                .IsUnique()
+                .HasDatabaseName("ux_application_statuses_code")
+                .HasFilter("deleted_at IS NULL");
+
+            entity.Property(e => e.ApplicationStatusId)
+                .ValueGeneratedNever()
+                .HasColumnName("application_status_id");
+
+            entity.Property(e => e.Code)
+                .HasMaxLength(50)
+                .HasColumnName("code");
+
+            entity.Property(e => e.NameRu)
+                .HasMaxLength(150)
+                .HasColumnName("name_ru");
+
+            entity.Property(e => e.NameKk)
+                .HasMaxLength(150)
+                .HasColumnName("name_kk");
+
+            entity.Property(e => e.NameEn)
+                .HasMaxLength(150)
+                .HasColumnName("name_en");
+
+            entity.Property(e => e.DescriptionRu).HasColumnName("description_ru");
+            entity.Property(e => e.DescriptionKk).HasColumnName("description_kk");
+            entity.Property(e => e.DescriptionEn).HasColumnName("description_en");
+
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+            entity.Property(e => e.DeletedAt).HasColumnName("deleted_at");
+            entity.Property(e => e.DeletedBy).HasColumnName("deleted_by");
+        });
+        
+        modelBuilder.Entity<Domain.Entities.Application>(entity =>
+        {
+            entity.HasKey(e => e.ApplicationId)
+                .HasName("applications_pkey");
+
+            entity.ToTable("applications");
+
+            entity.HasIndex(e => new { e.StudentId, e.VacancyId })
+                .IsUnique()
+                .HasDatabaseName("ux_applications_student_vacancy")
+                .HasFilter("deleted_at IS NULL");
+
+            entity.Property(e => e.ApplicationId)
+                .ValueGeneratedNever()
+                .HasColumnName("application_id");
+
+            entity.Property(e => e.StudentId).HasColumnName("student_id");
+            entity.Property(e => e.VacancyId).HasColumnName("vacancy_id");
+            entity.Property(e => e.StatusId).HasColumnName("status_id");
+
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+            entity.Property(e => e.DeletedAt).HasColumnName("deleted_at");
+            entity.Property(e => e.DeletedBy).HasColumnName("deleted_by");
+
+            entity.HasOne(d => d.Student)
+                .WithMany(p => p.Applications)
+                .HasForeignKey(d => d.StudentId)
+                .HasConstraintName("fk_applications_student");
+
+            entity.HasOne(d => d.Vacancy)
+                .WithMany(p => p.Applications)
+                .HasForeignKey(d => d.VacancyId)
+                .HasConstraintName("fk_applications_vacancy");
+
+            entity.HasOne(d => d.ApplicationStatus)
+                .WithMany(p => p.Applications)
+                .HasForeignKey(d => d.StatusId)
+                .HasConstraintName("fk_applications_status");
         });
 
         OnModelCreatingPartial(modelBuilder);

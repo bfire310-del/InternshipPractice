@@ -8,6 +8,7 @@ public class VacancyDetailResponse
     public string? CompanyName { get; init; }
     public string? CategoryName { get; init; }
     public string? WorkFormatName { get; init; }
+    public string? ShortDescription { get; init; }
     public string? FullDescription { get; init; }
     public string? Requirements { get; init; }
     public string? RegionName { get; init; }

@@ -327,6 +327,8 @@ public class VacancyRepository(InternshipPracticeDbContext dbContext): IVacancyR
                         ? v.WorkFormat.NameRu
                         : null,
 
+                    ShortDescription = v.ShortDescription,
+                    
                     FullDescription = v.FullDescription,
 
                     Requirements = v.Requirements,

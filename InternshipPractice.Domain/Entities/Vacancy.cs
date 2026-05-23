@@ -75,4 +75,5 @@ public partial class Vacancy
     public virtual ICollection<VacancyDocument> VacancyDocuments { get; set; } = new List<VacancyDocument>();
 
     public virtual WorkFormat? WorkFormat { get; set; }
+    public virtual ICollection<Application> Applications { get; set; } = new List<Application>();
 }
