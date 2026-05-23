@@ -293,7 +293,86 @@ public class VacancyRepository(InternshipPracticeDbContext dbContext): IVacancyR
             new Error(Domain.Common.Error.InternalServerError, ex.Message));
         }
     }
-    
+
+    public async Task<Result<VacancyDetailResponse>> GetVacancyDetailsById(Guid id)
+    {
+        try
+        {
+            var vacancy = await dbContext.Vacancies
+                .AsNoTracking()
+                .Where(v =>
+                    v.DeletedAt == null &&
+                    v.Status != null &&
+                    v.Status.Code == "active" &&
+                    v.VacancyId == id)
+                .Select(v => new VacancyDetailResponse
+                {
+                    VacancyId = v.VacancyId,
+
+                    JobTitle = v.JobTitle ?? "",
+
+                    Status = v.Status != null
+                        ? v.Status.NameRu
+                        : null,
+
+                    CompanyName = v.Employer != null && v.Employer.Company != null
+                        ? v.Employer.Company.CompanyNameRu
+                        : null,
+
+                    CategoryName = v.Category != null
+                        ? v.Category.NameRu
+                        : null,
+
+                    WorkFormatName = v.WorkFormat != null
+                        ? v.WorkFormat.NameRu
+                        : null,
+
+                    FullDescription = v.FullDescription,
+
+                    Requirements = v.Requirements,
+
+                    RegionName = v.Region != null
+                        ? v.Region.NameRu
+                        : null,
+
+                    Duration = CalculateDurationText(v.StartDate, v.EndDate),
+
+                    PaymentType = v.PaymentType != null
+                        ? v.PaymentType.NameRu
+                        : null,
+
+                    TypeOfEmployment = v.TypeOfEmployment != null
+                        ? v.TypeOfEmployment.NameRu
+                        : null,
+                    
+                    CreatedAt = v.CreatedAt,
+                    
+                    Skills = v.VacancySkillMaps
+                        .Where(x => x.DeletedAt == null)
+                        .Select(x => x.Skill.NameRu!)
+                        .ToList()
+                })
+                .FirstOrDefaultAsync();
+
+            if (vacancy is null)
+            {
+                return Result.Failure<VacancyDetailResponse>(
+                    new Error(
+                        Domain.Common.Error.NotFound,
+                        "Вакансия не найдена"));
+            }
+
+            return vacancy;
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<VacancyDetailResponse>(
+                new Error(
+                    Domain.Common.Error.InternalServerError,
+                    ex.Message));
+        }
+    }
+
     private static string? CalculateDurationText(DateOnly? startDate, DateOnly? endDate)
     {
         if (startDate is null || endDate is null)

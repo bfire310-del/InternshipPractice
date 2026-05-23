@@ -67,7 +67,7 @@ public partial class Vacancy
     public virtual Region? Region { get; set; }
 
     public virtual VacancyStatus? Status { get; set; }
-
+    public virtual ICollection<VacancySkillMap> VacancySkillMaps { get; set; } = new List<VacancySkillMap>();
     public virtual ICollection<StudentAssesment> StudentAssesments { get; set; } = new List<StudentAssesment>();
 
     public virtual TypeOfEmployment? TypeOfEmployment { get; set; }

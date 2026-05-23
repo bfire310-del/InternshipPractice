@@ -68,6 +68,7 @@ public partial class InternshipPracticeDbContext : DbContext
     public virtual DbSet<VacancyDocument> VacancyDocuments { get; set; }
 
     public virtual DbSet<VacancyStatus> VacancyStatuses { get; set; }
+    public virtual DbSet<VacancySkillMap> VacancySkillMaps { get; set; }
 
     public virtual DbSet<WorkFormat> WorkFormats { get; set; }
 
@@ -1053,6 +1054,44 @@ public partial class InternshipPracticeDbContext : DbContext
                 .HasColumnName("name_ru");
             entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
             entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+        });
+        
+        modelBuilder.Entity<VacancySkillMap>(entity =>
+        {
+            entity.HasKey(e => e.VacancySkillMapId).HasName("vacancy_skill_map_pkey");
+
+            entity.ToTable("vacancy_skill_map");
+
+            entity.HasIndex(e => new { e.VacancyId, e.SkillId })
+                .IsUnique()
+                .HasDatabaseName("ux_vacancy_skill_map_vacancy_skill")
+                .HasFilter("deleted_at IS NULL");
+
+            entity.Property(e => e.VacancySkillMapId)
+                .ValueGeneratedNever()
+                .HasColumnName("vacancy_skill_map_id");
+
+            entity.Property(e => e.VacancyId).HasColumnName("vacancy_id");
+            entity.Property(e => e.SkillId).HasColumnName("skill_id");
+
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+            entity.Property(e => e.DeletedAt).HasColumnName("deleted_at");
+            entity.Property(e => e.DeletedBy).HasColumnName("deleted_by");
+
+            entity.HasOne(d => d.Vacancy)
+                .WithMany(p => p.VacancySkillMaps)
+                .HasForeignKey(d => d.VacancyId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_vacancy_skill_map_vacancy");
+
+            entity.HasOne(d => d.Skill)
+                .WithMany(p => p.VacancySkillMaps)
+                .HasForeignKey(d => d.SkillId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_vacancy_skill_map_skill");
         });
 
         modelBuilder.Entity<WorkFormat>(entity =>
