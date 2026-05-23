@@ -1,6 +1,9 @@
 ﻿using InternshipPractice.Application.Interfaces.Repositories;
+using InternshipPractice.Application.Interfaces.Services;
 using InternshipPractice.Infrastructure.Data;
+using InternshipPractice.Infrastructure.Options;
 using InternshipPractice.Infrastructure.Repositories;
+using InternshipPractice.Infrastructure.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -27,6 +30,8 @@ public static class ServiceCollection
         services.AddScoped<IPaymentTypeRepository, PaymentTypeRepository>();
         services.AddScoped<IStudentRepository, StudentRepository>();
         services.AddScoped<IUsersRepository, UsersRepository>();
+        services.Configure<JwtOptions>(configuration.GetSection("JwtSettings"));
+        services.AddScoped<IJwtService, JwtService>();
         return services;
     }
 }
