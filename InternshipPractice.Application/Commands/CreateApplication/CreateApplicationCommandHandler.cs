@@ -2,7 +2,7 @@
 using KDS.Primitives.FluentResult;
 using MediatR;
 
-namespace InternshipPractice.Application.Queries.CreateApplication;
+namespace InternshipPractice.Application.Commands.CreateApplication;
 
 public class CreateApplicationCommandHandler(IApplicationRepository applicationRepository) : IRequestHandler<CreateApplicationCommand, Result>
 {

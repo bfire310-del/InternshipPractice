@@ -1,6 +1,8 @@
 ﻿using System.Security.Claims;
 using InternshipPractice.Api.Requests;
-using InternshipPractice.Application.Queries.CreateApplication;
+using InternshipPractice.Application.Commands.CreateApplication;
+using InternshipPractice.Application.Commands.WithdrawApplication;
+using InternshipPractice.Application.Queries.GetApplicationsByStatus;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -20,12 +22,48 @@ public class ApplicationController : BaseController
             return Unauthorized();
 
         var result = await Mediator.Send(new CreateApplicationCommand(
-            request.VacancyId,
-            userId));
+            userId,
+            request.VacancyId));
 
         if (result.IsFailed)
             return ProblemResponse(result.Error);
 
         return Ok(result);
     }
+    
+    [HttpGet("by-status")]
+    public async Task<IActionResult> GetApplicationsByStatus([FromQuery] string? statusCode, [FromQuery] string lang = "ru")
+    {
+        var userIdValue = User.FindFirstValue("UserId");
+
+        if (!Guid.TryParse(userIdValue, out var userId))
+            return Unauthorized();
+
+        var result = await Mediator.Send(new GetApplicationsByStatusQuery(userId, statusCode, lang));
+
+        if (result.IsFailed)
+            return ProblemResponse(result.Error);
+
+        return Ok(result.Value);
+    }
+    
+    [HttpPost("{applicationId:guid}/withdraw")]
+    public async Task<IActionResult> WithdrawApplication(Guid applicationId)
+    {
+        var userIdValue = User.FindFirstValue("UserId");
+
+        if (!Guid.TryParse(userIdValue, out var userId))
+            return Unauthorized();
+
+        var result = await Mediator.Send(
+            new WithdrawApplicationCommand(
+                userId,
+                applicationId));
+
+        if (result.IsFailed)
+            return ProblemResponse(result.Error);
+
+        return Ok();
+    }
+    
 }

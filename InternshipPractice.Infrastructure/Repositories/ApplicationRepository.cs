@@ -92,7 +92,7 @@ public class ApplicationRepository(InternshipPracticeDbContext dbContext): IAppl
                     $"Ошибка при создании заявки: {ex.Message}"));
         }
     }
-    public async Task<Result<List<ApplicationListResponse>>> GetStudentApplications(Guid userId, string? statusCode, string lang)
+    public async Task<Result<List<ApplicationListResponse>>> GetApplicationsByStatus(Guid userId, string? statusCode, string lang)
     {
         try
         {
@@ -228,6 +228,78 @@ public class ApplicationRepository(InternshipPracticeDbContext dbContext): IAppl
                 new Error(
                     Domain.Common.Error.InternalServerError,
                     $"Ошибка при получении заявок: {ex.Message}"));
+        }
+    }
+    
+    public async Task<Result> WithdrawApplication(Guid userId, Guid applicationId)
+    {
+        try
+        {
+            var studentId = await dbContext.Students
+                .Where(s => s.UserId == userId && s.DeletedAt == null)
+                .Select(s => s.StudentId)
+                .FirstOrDefaultAsync();
+
+            if (studentId == Guid.Empty)
+            {
+                return Result.Failure(
+                    new Error(
+                        Domain.Common.Error.NotFound,
+                        "Студент для текущего пользователя не найден"));
+            }
+
+            var application = await dbContext.Applications
+                .Include(a => a.ApplicationStatus)
+                .FirstOrDefaultAsync(a =>
+                    a.ApplicationId == applicationId &&
+                    a.StudentId == studentId &&
+                    a.DeletedAt == null);
+
+            if (application is null)
+            {
+                return Result.Failure(
+                    new Error(
+                        Domain.Common.Error.NotFound,
+                        "Заявка не найдена"));
+            }
+
+            var currentStatusCode = application.ApplicationStatus.Code;
+
+            if (currentStatusCode is not ("under_review" or "approved"))
+            {
+                return Result.Failure(
+                    new Error(
+                        Domain.Common.Error.BadRequest,
+                        "Заявку можно отозвать только если она на рассмотрении или одобрена"));
+            }
+
+            var withdrawnStatusId = await dbContext.ApplicationStatuses
+                .Where(s => s.Code == "withdrawn" && s.DeletedAt == null)
+                .Select(s => s.ApplicationStatusId)
+                .FirstOrDefaultAsync();
+
+            if (withdrawnStatusId == Guid.Empty)
+            {
+                return Result.Failure(
+                    new Error(
+                        Domain.Common.Error.InternalServerError,
+                        "Статус заявки withdrawn не найден"));
+            }
+
+            application.StatusId = withdrawnStatusId;
+            application.UpdatedAt = DateTime.UtcNow;
+            application.UpdatedBy = userId;
+
+            await dbContext.SaveChangesAsync();
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure(
+                new Error(
+                    Domain.Common.Error.InternalServerError,
+                    $"Ошибка при отзыве заявки: {ex.Message}"));
         }
     }
 }
