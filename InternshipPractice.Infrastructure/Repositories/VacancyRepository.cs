@@ -1,4 +1,5 @@
-﻿using InternshipPractice.Application.Interfaces.Repositories;
+﻿using InternshipPractice.Application.Helpers;
+using InternshipPractice.Application.Interfaces.Repositories;
 using InternshipPractice.Application.Responses;
 using InternshipPractice.Infrastructure.Data;
 using KDS.Primitives.FluentResult;
@@ -184,7 +185,7 @@ public class VacancyRepository(InternshipPracticeDbContext dbContext): IVacancyR
                         ? v.RegionNameEn ?? v.RegionNameRu
                         : v.RegionNameRu,
 
-                Duration = CalculateDurationText(v.StartDate, v.EndDate),
+                Duration = DurationHelper.CalculateDurationText(v.StartDate, v.EndDate),
 
                 PaymentType = lang == "kk"
                     ? v.PaymentTypeNameKk ?? v.PaymentTypeNameRu
@@ -337,7 +338,7 @@ public class VacancyRepository(InternshipPracticeDbContext dbContext): IVacancyR
                         ? v.Region.NameRu
                         : null,
 
-                    Duration = CalculateDurationText(v.StartDate, v.EndDate),
+                    Duration = DurationHelper.CalculateDurationText(v.StartDate, v.EndDate),
 
                     PaymentType = v.PaymentType != null
                         ? v.PaymentType.NameRu
@@ -373,43 +374,5 @@ public class VacancyRepository(InternshipPracticeDbContext dbContext): IVacancyR
                     Domain.Common.Error.InternalServerError,
                     ex.Message));
         }
-    }
-
-    private static string? CalculateDurationText(DateOnly? startDate, DateOnly? endDate)
-    {
-        if (startDate is null || endDate is null)
-            return null;
-
-        if (endDate < startDate)
-            return null;
-
-        var months = (endDate.Value.Year - startDate.Value.Year) * 12
-            + endDate.Value.Month - startDate.Value.Month;
-
-        if (endDate.Value.Day < startDate.Value.Day)
-            months--;
-
-        if (months <= 0)
-            return "До 1 месяца";
-
-        if (months == 1)
-            return "1 месяц";
-
-        if (months is >= 2 and <= 4)
-            return $"{months} месяца";
-
-        if (months is >= 5 and <= 11)
-            return $"{months} месяцев";
-
-        var years = months / 12;
-        var restMonths = months % 12;
-
-        if (years == 1 && restMonths == 0)
-            return "1 год";
-
-        if (restMonths == 0)
-            return $"{years} года";
-
-        return $"{years} г. {restMonths} мес.";
     }
 }

@@ -14,7 +14,7 @@ public class ApplicationController : BaseController
     [HttpPost("create")]
     public async Task<IActionResult> CreateApplication(CreateApplicationRequest request)
     {
-        var userIdValue = User.FindFirstValue(ClaimTypes.NameIdentifier);
+        var userIdValue = User.FindFirstValue("UserId");
 
         if (!Guid.TryParse(userIdValue, out var userId))
             return Unauthorized();
