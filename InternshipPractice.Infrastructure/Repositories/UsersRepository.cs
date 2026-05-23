@@ -1,5 +1,6 @@
 ﻿using InternshipPractice.Application.Interfaces.Repositories;
 using InternshipPractice.Application.Responses;
+using InternshipPractice.Domain.Entities;
 using InternshipPractice.Infrastructure.Data;
 using KDS.Primitives.FluentResult;
 using Microsoft.EntityFrameworkCore;
@@ -29,6 +30,22 @@ public class UsersRepository(InternshipPracticeDbContext dbContext): IUsersRepos
         catch (Exception ex)
         {
             return Result.Failure<List<UserResponse>>(
+            new Error(Domain.Common.Error.InternalServerError, ex.Message));
+        }
+    }
+
+    public async Task<Result<User>> GetUserByEmailAndPassword(string email, string password)
+    {
+        try
+        {
+            var result = await dbContext.Users
+                .Where(u => u.Email.Equals(email) && u.PasswordHash.Equals(password))
+                .FirstAsync();
+            return result;
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<User>(
             new Error(Domain.Common.Error.InternalServerError, ex.Message));
         }
     }

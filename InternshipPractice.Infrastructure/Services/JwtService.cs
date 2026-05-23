@@ -11,7 +11,7 @@ namespace InternshipPractice.Infrastructure.Services;
 
 public class JwtService(IOptions<JwtOptions> options): IJwtService
 {
-    public async Task<Result<string>> GenerateToken(int userId, string roleCode)
+    public async Task<Result<string>> GenerateToken(Guid userId, string roleCode)
     {
         var tokenHandler = new JwtSecurityTokenHandler();
         var key = Encoding.ASCII.GetBytes(options.Value.SecretKey);
@@ -31,7 +31,7 @@ public class JwtService(IOptions<JwtOptions> options): IJwtService
         return tokenHandler.WriteToken(token);
     }
 
-    public async Task<Result<(int, string)>> ValidateToken(string token)
+    public async Task<Result<(Guid, string)>> ValidateToken(string token)
     {
         try
         {
@@ -51,25 +51,25 @@ public class JwtService(IOptions<JwtOptions> options): IJwtService
             var roleCodeClaim = principal.FindFirst("ConnectionId");
             var iin = principal.FindFirst("Iin");
 
-            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out var userId))
+            if (userIdClaim == null || !Guid.TryParse(userIdClaim.Value, out var userId))
             {
-                return Result.Failure<(int, string)>(new Error("500", "Некорректный токен: отсутствует UserId."));
+                return Result.Failure<(Guid, string)>(new Error("500", "Некорректный токен: отсутствует UserId."));
             }
 
             if (roleCodeClaim == null || string.IsNullOrWhiteSpace(roleCodeClaim.Value))
             {
 
-                return Result.Failure<(int, string)>(new Error("BadRequest", "Некорректный токен: отсутствует RoleCode."));
+                return Result.Failure<(Guid, string)>(new Error("BadRequest", "Некорректный токен: отсутствует RoleCode."));
             }
             return Result.Success((userId, roleCodeClaim.Value));
         }
         catch (SecurityTokenException)
         {
-            return Result.Failure<(int, string)>(new Error("BadRequest", "Некорректный токен."));
+            return Result.Failure<(Guid, string)>(new Error("BadRequest", "Некорректный токен."));
         }
         catch (Exception)
         {
-            return Result.Failure<(int, string)>(new Error("ServiceUnavailable", "Произошла ошибка при обработке токена."));
+            return Result.Failure<(Guid, string)>(new Error("ServiceUnavailable", "Произошла ошибка при обработке токена."));
         }
     }
 }
