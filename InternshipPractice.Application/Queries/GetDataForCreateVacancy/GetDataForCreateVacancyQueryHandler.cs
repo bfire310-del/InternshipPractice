@@ -9,7 +9,8 @@ public class GetDataForCreateVacancyQueryHandler(IWorkFormatRepository workForma
     IPracticeFormRepository practiceFormRepository,
     ITypeOfEmploymentRepository typeOfEmploymentRepository,
     IVacancyCategoryRepository vacancyCategoryRepository,
-    IPaymentTypeRepository paymentTypeRepository) : IRequestHandler<GetDataForCreateVacancyQuery, Result<GetDataForCreateVacancyResponse>>
+    IPaymentTypeRepository paymentTypeRepository,
+    IRegionRepository regionRepository) : IRequestHandler<GetDataForCreateVacancyQuery, Result<GetDataForCreateVacancyResponse>>
 {
     public async Task<Result<GetDataForCreateVacancyResponse>> Handle(GetDataForCreateVacancyQuery request, CancellationToken cancellationToken)
     {
@@ -18,7 +19,7 @@ public class GetDataForCreateVacancyQueryHandler(IWorkFormatRepository workForma
         var typeOfEmployment = await typeOfEmploymentRepository.GetAll();
         var vacancyCategories = await vacancyCategoryRepository.GetAll();
         var paymentTypes = await paymentTypeRepository.GetAll();
-
+        var regions = await regionRepository.GetAll();
         GetDataForCreateVacancyResponse result = new GetDataForCreateVacancyResponse()
         {
             WorkFormats = workFormat.Value,
@@ -26,6 +27,7 @@ public class GetDataForCreateVacancyQueryHandler(IWorkFormatRepository workForma
             TypeOfEmployments = typeOfEmployment.Value,
             VacancyCategories = vacancyCategories.Value,
             PaymentTypes = paymentTypes.Value,
+            Regions = regions.Value,
         };
 
         return result;

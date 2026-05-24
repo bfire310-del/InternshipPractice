@@ -9,4 +9,5 @@ public class GetDataForCreateVacancyResponse
     public List<WorkFormatDto> WorkFormats { get; set; }
     public List<VacancyCategoryDto> VacancyCategories { get; set; }
     public List<PaymentTypeDto> PaymentTypes { get; set; }
+    public List<RegionDto> Regions {  get; set; }
 }

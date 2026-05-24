@@ -1,4 +1,5 @@
-﻿using InternshipPractice.Api.Requests;
+﻿using System.Security.Claims;
+using InternshipPractice.Api.Requests;
 using InternshipPractice.Application.Queries.GetActiveVacanciesByCompanyId;
 using InternshipPractice.Application.Queries.GetFilteredVacancyNameList;
 using InternshipPractice.Application.Queries.GetVacanciesByEmployerId;
@@ -6,6 +7,7 @@ using InternshipPractice.Application.Queries.GetVacancyByLikeWord;
 using InternshipPractice.Application.Queries.GetVacancyCount;
 using InternshipPractice.Application.Queries.GetVacancyCountNew;
 using InternshipPractice.Application.Queries.GetVacancyDetailsById;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InternshipPractice.Api.Controllers;
@@ -38,8 +40,14 @@ public class VacancyController : BaseController
     
     
     [HttpPost("filtered")]
+    [Authorize]
     public async Task<IActionResult> GetFilteredVacancies(VacancySearchRequest request)
     {
+        var userIdValue = User.FindFirstValue("UserId");
+
+        if (!Guid.TryParse(userIdValue, out var userId))
+            return Unauthorized();
+        
         var result = await Mediator.Send(new GetFilteredVacancyNameListQuery(
             request.Query,
             request.RegionId,
@@ -48,7 +56,8 @@ public class VacancyController : BaseController
             request.CategoryId,
             request.Lang,
             request.Page,
-            request.PageSize));
+            request.PageSize,
+            userId));
         
         if (result.IsFailed)
             return ProblemResponse(result.Error);
@@ -57,9 +66,15 @@ public class VacancyController : BaseController
     }
 
     [HttpGet("details")]
+    [Authorize]
     public async Task<IActionResult> GetVacancyDetailsById(Guid id)
     {
-        var result = await Mediator.Send(new GetVacancyDetailsByIdQuery(id));
+        var userIdValue = User.FindFirstValue("UserId");
+
+        if (!Guid.TryParse(userIdValue, out var userId))
+            return Unauthorized();
+
+        var result = await Mediator.Send(new GetVacancyDetailsByIdQuery(id, userId));
 
         if (result.IsFailed)
             return ProblemResponse(result.Error);

@@ -17,6 +17,7 @@ public class GetFilteredVacancyNameListQueryHandler(IVacancyRepository vacancyRe
             request.Lang,
             request.Page,
             request.PageSize,
+            request.UserId,
             cancellationToken);
         return result;
     }

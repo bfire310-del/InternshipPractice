@@ -31,9 +31,11 @@ public static class ServiceCollection
         services.AddScoped<IStudentRepository, StudentRepository>();
         services.AddScoped<IUsersRepository, UsersRepository>();
         services.AddScoped<IApplicationRepository, ApplicationRepository>();
+        services.AddScoped<IContractRepository, ContractRepository>();
         services.Configure<JwtOptions>(configuration.GetSection("JwtSettings"));
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IWorkFormatRepository, WorkFormatRepository>();
+        services.AddScoped<IApplicationService, ApplicationService>();
         services.AddScoped<ITypeOfEmploymentRepository, TypeOfEmploymentRepository>();
         services.AddScoped<IPracticeFormRepository, PracticeFormRepository>();
         return services;

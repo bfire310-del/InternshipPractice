@@ -23,4 +23,5 @@ public partial class Application
     public virtual Student Student { get; set; } = null!;
     public virtual Vacancy Vacancy { get; set; } = null!;
     public virtual ApplicationStatus ApplicationStatus { get; set; } = null!;
+    public virtual Contract? Contract { get; set; }
 }

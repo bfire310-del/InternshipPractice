@@ -17,4 +17,5 @@ public class VacancyDetailResponse
     public string? TypeOfEmployment { get; init; }
     public DateTime? CreatedAt { get; init; }
     public List<string> Skills { get; init; } = [];
+    public bool HasApplied { get; init; }
 }

@@ -4,4 +4,4 @@ using MediatR;
 
 namespace InternshipPractice.Application.Queries.GetApplicationsByStatus;
 
-public record GetApplicationsByStatusQuery(Guid UserId, string? StatusCode, string Lang):IRequest<Result<List<ApplicationListResponse>>>;
+public record GetApplicationsByStatusQuery(Guid UserId, string? StatusCode, string Lang, int Page, int PageSize):IRequest<Result<PagedResult<ApplicationListResponse>>>;

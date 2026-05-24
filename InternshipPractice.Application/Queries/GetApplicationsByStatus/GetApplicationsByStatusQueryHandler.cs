@@ -5,11 +5,11 @@ using MediatR;
 
 namespace InternshipPractice.Application.Queries.GetApplicationsByStatus;
 
-public class GetApplicationsByStatusQueryHandler(IApplicationRepository applicationRepository) : IRequestHandler<GetApplicationsByStatusQuery, Result<List<ApplicationListResponse>>>
+public class GetApplicationsByStatusQueryHandler(IApplicationRepository applicationRepository) : IRequestHandler<GetApplicationsByStatusQuery, Result<PagedResult<ApplicationListResponse>>>
 {
-    public async Task<Result<List<ApplicationListResponse>>> Handle(GetApplicationsByStatusQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<ApplicationListResponse>>> Handle(GetApplicationsByStatusQuery request, CancellationToken cancellationToken)
     {
-        var result = await applicationRepository.GetApplicationsByStatus(request.UserId, request.StatusCode, request.Lang);
+        var result = await applicationRepository.GetApplicationsByStatus(request.UserId, request.StatusCode, request.Lang, request.Page, request.PageSize);
         return result;
     }
 }

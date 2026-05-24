@@ -9,7 +9,7 @@ public class GetVacancyDetailsByIdQueryHandler(IVacancyRepository vacancyReposit
 {
     public async Task<Result<VacancyDetailResponse>> Handle(GetVacancyDetailsByIdQuery request, CancellationToken cancellationToken)
     {
-        var result = await vacancyRepository.GetVacancyDetailsById(request.Id);
+        var result = await vacancyRepository.GetVacancyDetailsById(request.Id, request.UserId);
         return result;
     }
 }
