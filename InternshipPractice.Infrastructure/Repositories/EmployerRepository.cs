@@ -1,4 +1,5 @@
 ﻿using InternshipPractice.Application.Interfaces.Repositories;
+using InternshipPractice.Domain.Entities;
 using InternshipPractice.Infrastructure.Data;
 using KDS.Primitives.FluentResult;
 using Microsoft.EntityFrameworkCore;

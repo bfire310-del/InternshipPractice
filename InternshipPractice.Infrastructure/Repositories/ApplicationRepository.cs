@@ -302,4 +302,59 @@ public class ApplicationRepository(InternshipPracticeDbContext dbContext): IAppl
                     $"Ошибка при отзыве заявки: {ex.Message}"));
         }
     }
+    public async Task<Result<int>> GetResponsesCountByEmployerId(Guid userId)
+    {
+        try
+        {
+            var result = await dbContext.Applications
+            .Join(
+                dbContext.Vacancies,
+                application => application.VacancyId,
+                vacancy => vacancy.VacancyId,
+                (application, vacancy) => new { application, vacancy }
+            )
+            .Join(
+                dbContext.Employers,
+                x => x.vacancy.EmployerId,
+                employer => employer.EmployerId,
+                (x, employer) => new { x.application, x.vacancy, employer }
+            )
+            .Where(x => x.employer.UserId == userId)
+            .CountAsync();
+            return result;
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<int>(new Error(Domain.Common.Error.InternalServerError, $"Ошибка при получении количества работадателей: {ex.Message}"));
+        }
+    }
+    public async Task<Result<int>> GetCongratsContracts(Guid userId)
+    {
+        try
+        {
+            var result = await dbContext.Applications
+            .Join(
+                dbContext.Vacancies,
+                application => application.VacancyId,
+                vacancy => vacancy.VacancyId,
+                (application, vacancy) => new { application, vacancy }
+            )
+            .Join(
+                dbContext.Employers,
+                x => x.vacancy.EmployerId,
+                employer => employer.EmployerId,
+                (x, employer) => new { x.application, x.vacancy, employer }
+            )
+            .Where(x => x.employer.UserId == userId
+            && x.application.StatusId == Guid.Parse("ddae979f-b41d-4580-ac91-afa62b19f231"))
+            .CountAsync();
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<int>(new Error(Domain.Common.Error.InternalServerError, $"Ошибка при получении количества работадателей: {ex.Message}"));
+        }
+    }
+
 }

@@ -1,4 +1,6 @@
 ﻿using InternshipPractice.Application.Responses;
+using InternshipPractice.Domain.Entities;
+using InternshipPractice.Domain.Requests;
 using KDS.Primitives.FluentResult;
 
 namespace InternshipPractice.Application.Interfaces.Repositories;
@@ -21,4 +23,7 @@ public interface IVacancyRepository
     Task<Result<int>> GetActiveVacanciesCountByCompanyId(Guid companyId);
     Task<Result<List<VacancySearchResponse>>> GetVacanciesByEmployerId(Guid employerId);
     Task<Result<VacancyDetailResponse>> GetVacancyDetailsById(Guid id);
+    Task<Result<int>> GetActiveVacanciesByUserId(Guid userId);
+    Task<Result<List<GetMyVacanciesResponse>>> GetMyVacancies(Guid userId);
+    Task<Result> AddAsync(CreateVacancyRequest request);
 }

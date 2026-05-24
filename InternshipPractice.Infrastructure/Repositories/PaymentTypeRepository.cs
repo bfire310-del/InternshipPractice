@@ -1,5 +1,6 @@
 ﻿using InternshipPractice.Application.Interfaces.Repositories;
 using InternshipPractice.Application.Responses;
+using InternshipPractice.Domain.Dto;
 using InternshipPractice.Infrastructure.Data;
 using KDS.Primitives.FluentResult;
 using Microsoft.EntityFrameworkCore;
@@ -48,6 +49,29 @@ public class PaymentTypeRepository(InternshipPracticeDbContext dbContext): IPaym
         catch (Exception ex)
         {
             return Result.Failure<List<NameDto>>(new Error(Domain.Common.Error.InternalServerError, $"Ошибка при получении названий типов оплаты: {ex.Message}"));
+        }
+    }
+
+    public async Task<Result<List<PaymentTypeDto>>> GetAll()
+    {
+        try
+        {
+            return await dbContext.PaymentTypes
+                .Select(p => new PaymentTypeDto
+                {
+                    PaymentTypeId = p.PaymentTypeId,
+                    NameEn = p.NameEn,
+                    NameRu = p.NameRu,
+                    NameKk = p.NameKk
+                })
+                .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<List<PaymentTypeDto>>(
+                new Error(
+                    Domain.Common.Error.InternalServerError,
+                    ex.Message));
         }
     }
 }

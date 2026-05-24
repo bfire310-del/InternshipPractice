@@ -33,6 +33,9 @@ public static class ServiceCollection
         services.AddScoped<IApplicationRepository, ApplicationRepository>();
         services.Configure<JwtOptions>(configuration.GetSection("JwtSettings"));
         services.AddScoped<IJwtService, JwtService>();
+        services.AddScoped<IWorkFormatRepository, WorkFormatRepository>();
+        services.AddScoped<ITypeOfEmploymentRepository, TypeOfEmploymentRepository>();
+        services.AddScoped<IPracticeFormRepository, PracticeFormRepository>();
         return services;
     }
 }

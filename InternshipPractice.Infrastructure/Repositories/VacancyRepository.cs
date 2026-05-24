@@ -1,6 +1,8 @@
 ﻿using InternshipPractice.Application.Helpers;
 using InternshipPractice.Application.Interfaces.Repositories;
 using InternshipPractice.Application.Responses;
+using InternshipPractice.Domain.Entities;
+using InternshipPractice.Domain.Requests;
 using InternshipPractice.Infrastructure.Data;
 using KDS.Primitives.FluentResult;
 using Microsoft.EntityFrameworkCore;
@@ -370,6 +372,109 @@ public class VacancyRepository(InternshipPracticeDbContext dbContext): IVacancyR
         catch (Exception ex)
         {
             return Result.Failure<VacancyDetailResponse>(
+                new Error(
+                    Domain.Common.Error.InternalServerError,
+                    ex.Message));
+        }
+    }
+
+    public async Task<Result<int>> GetActiveVacanciesByUserId(Guid userId)
+    {
+        try
+        {
+            var result = await dbContext.Employers
+                .Where(v => v.UserId == userId)
+                .Join(
+                    dbContext.Vacancies,
+                    employer => employer.EmployerId,
+                    vacancy => vacancy.EmployerId,
+                    (employer, vacancy) => vacancy
+                )
+                .Where(v => v.Status.Code == "active")
+                .CountAsync();
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<int>(
+            new Error(Domain.Common.Error.InternalServerError, ex.Message));
+        }
+    }
+
+    public async Task<Result<List<GetMyVacanciesResponse>>> GetMyVacancies(Guid userId)
+    {
+        try
+        {
+            var underReviewStatusId =
+                Guid.Parse("43716180-677b-4838-9e14-553966b1b31f");
+
+            var result = await dbContext.Employers
+                .Where(e => e.UserId == userId)
+                .Join(
+                    dbContext.Vacancies,
+                    employer => employer.EmployerId,
+                    vacancy => vacancy.EmployerId,
+                    (employer, vacancy) => vacancy
+                )
+                .Select(vacancy => new GetMyVacanciesResponse
+                {
+                    VacancyId = vacancy.VacancyId,
+                    VacancyNameRu = vacancy.NameRu,
+                    VacancyNameKk = vacancy.NameKk,
+                    VacancyNameEn = vacancy.NameEn,
+                    Description = vacancy.ShortDescription,
+                    StartDate = vacancy.StartDate.HasValue
+    ? vacancy.StartDate.Value.ToDateTime(TimeOnly.MinValue)
+    : default,
+
+                    VacancyStatusCode = vacancy.Status.Code,
+                    Responses = dbContext.Applications
+            .Count(a => a.VacancyId == vacancy.VacancyId)
+                })
+                .ToListAsync();
+
+            return Result.Success(result);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<List<GetMyVacanciesResponse>>(
+                new Error(
+                    Domain.Common.Error.InternalServerError,
+                    ex.Message));
+        }
+    }
+    
+    public async Task<Result> AddAsync(CreateVacancyRequest request)
+    {
+        try
+        {
+            await dbContext.AddAsync(new Vacancy
+            {
+                EmployerId = request.EmployerId,
+                NameRu = request.NameRu,
+                ShortDescription = request.ShotrDescription,
+                FullDescription = request.FullDescription,
+                TypeOfEmploymentId = request.TypeOfEmploymentsId,
+                PracticeFormId = request.PracticeFormId,
+                WorkFormatId = request.WorkFormatId,
+                CategoryId = request.CategoryId,
+                Course = request.Course,
+                NeccessaryTasks = request.NeccessaryTasks,
+                Requirements = request.Requirements,
+                StartDate = DateOnly.FromDateTime(request.StartDate),
+                EndDate = DateOnly.FromDateTime(request.EndDate),
+                Address = request.Address,
+                JobTitle = request.JobTitle,
+                PaymentTypeId = request.PaymentTypeId
+            });
+
+            await dbContext.SaveChangesAsync();
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<List<GetMyVacanciesResponse>>(
                 new Error(
                     Domain.Common.Error.InternalServerError,
                     ex.Message));
