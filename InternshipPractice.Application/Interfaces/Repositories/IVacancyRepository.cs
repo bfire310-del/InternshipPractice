@@ -27,4 +27,5 @@ public interface IVacancyRepository
     Task<Result<int>> GetActiveVacanciesByUserId(Guid userId);
     Task<Result<List<GetMyVacanciesResponse>>> GetMyVacancies(Guid userId);
     Task<Result> AddAsync(CreateVacancyRequest request);
+    Task<Result> Delete(Guid vacancyId);
 }

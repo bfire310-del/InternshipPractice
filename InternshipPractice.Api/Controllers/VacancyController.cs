@@ -1,5 +1,6 @@
 ﻿using System.Security.Claims;
 using InternshipPractice.Api.Requests;
+using InternshipPractice.Application.Queries;
 using InternshipPractice.Application.Queries.GetActiveVacanciesByCompanyId;
 using InternshipPractice.Application.Queries.GetFilteredVacancyNameList;
 using InternshipPractice.Application.Queries.GetVacanciesByEmployerId;
@@ -113,5 +114,17 @@ public class VacancyController : BaseController
             return ProblemResponse(result.Error);
 
         return Ok(result.Value);
+    }
+
+    [Authorize]
+    [HttpGet("delete")]
+    public async Task<IActionResult> DeleteVacancy(Guid vacancyId)
+    {
+        var result = await Mediator.Send(new DeleteVacancyQuery(vacancyId));
+
+        if (result.IsFailed)
+            return ProblemResponse(result.Error);
+
+        return Ok();
     }
 }

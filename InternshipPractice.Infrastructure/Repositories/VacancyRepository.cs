@@ -505,4 +505,25 @@ public class VacancyRepository(InternshipPracticeDbContext dbContext): IVacancyR
                     ex.Message));
         }
     }
+
+    public async Task<Result> Delete(Guid vacancyId)
+    {
+        try
+        {
+            var vacancy = await dbContext.Vacancies.FirstAsync(v=>v.VacancyId == vacancyId);
+
+            var deletedStatusId = await dbContext.VacancyStatuses.Where(s => s.Code == "deleted").Select(s=>s.VacancyStatusId).FirstAsync();
+
+            vacancy.StatusId = deletedStatusId;
+            await dbContext.SaveChangesAsync();
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<List<GetMyVacanciesResponse>>(
+                new Error(
+                    Domain.Common.Error.InternalServerError,
+                    ex.Message));
+        }
+    }
 }
