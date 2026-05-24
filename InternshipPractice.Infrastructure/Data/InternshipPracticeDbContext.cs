@@ -74,6 +74,10 @@ public partial class InternshipPracticeDbContext : DbContext
     
     public virtual DbSet<Domain.Entities.Application> Applications { get; set; }
     public virtual DbSet<ApplicationStatus> ApplicationStatuses { get; set; }
+    
+    public virtual DbSet<Contract> Contracts { get; set; }
+    public virtual DbSet<ContractTemplate> ContractTemplates { get; set; }
+    public virtual DbSet<ContractStatus> ContractStatuses { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -1208,6 +1212,131 @@ public partial class InternshipPracticeDbContext : DbContext
                 .WithMany(p => p.Applications)
                 .HasForeignKey(d => d.StatusId)
                 .HasConstraintName("fk_applications_status");
+        });
+        
+        modelBuilder.Entity<ContractTemplate>(entity =>
+        {
+            entity.HasKey(e => e.ContractTemplateId).HasName("contract_templates_pkey");
+
+            entity.ToTable("contract_templates");
+
+            entity.Property(e => e.ContractTemplateId)
+                .ValueGeneratedNever()
+                .HasColumnName("contract_template_id");
+
+            entity.Property(e => e.NameRu).HasMaxLength(150).HasColumnName("name_ru");
+            entity.Property(e => e.NameKk).HasMaxLength(150).HasColumnName("name_kk");
+            entity.Property(e => e.NameEn).HasMaxLength(150).HasColumnName("name_en");
+
+            entity.Property(e => e.ContentRu).HasColumnName("content_ru");
+            entity.Property(e => e.ContentKk).HasColumnName("content_kk");
+            entity.Property(e => e.ContentEn).HasColumnName("content_en");
+
+            entity.Property(e => e.IsActive).HasColumnName("is_active");
+
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+            entity.Property(e => e.DeletedAt).HasColumnName("deleted_at");
+            entity.Property(e => e.DeletedBy).HasColumnName("deleted_by");
+        });
+        
+        modelBuilder.Entity<ContractStatus>(entity =>
+        {
+            entity.HasKey(e => e.ContractStatusId).HasName("contract_statuses_pkey");
+
+            entity.ToTable("contract_statuses");
+
+            entity.HasIndex(e => e.Code)
+                .IsUnique()
+                .HasDatabaseName("contract_statuses_code_key");
+
+            entity.Property(e => e.ContractStatusId)
+                .ValueGeneratedNever()
+                .HasColumnName("contract_status_id");
+
+            entity.Property(e => e.Code).HasMaxLength(50).HasColumnName("code");
+
+            entity.Property(e => e.NameRu).HasMaxLength(150).HasColumnName("name_ru");
+            entity.Property(e => e.NameKk).HasMaxLength(150).HasColumnName("name_kk");
+            entity.Property(e => e.NameEn).HasMaxLength(150).HasColumnName("name_en");
+
+            entity.Property(e => e.DescriptionRu).HasColumnName("description_ru");
+            entity.Property(e => e.DescriptionKk).HasColumnName("description_kk");
+            entity.Property(e => e.DescriptionEn).HasColumnName("description_en");
+
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+            entity.Property(e => e.DeletedAt).HasColumnName("deleted_at");
+            entity.Property(e => e.DeletedBy).HasColumnName("deleted_by");
+        });
+        
+        modelBuilder.Entity<Contract>(entity =>
+        {
+            entity.HasKey(e => e.ContractId).HasName("contracts_pkey");
+
+            entity.ToTable("contracts");
+
+            entity.HasIndex(e => e.ContractNumber)
+                .IsUnique()
+                .HasDatabaseName("ux_contracts_contract_number")
+                .HasFilter("deleted_at IS NULL");
+
+            entity.HasIndex(e => e.ApplicationId)
+                .IsUnique()
+                .HasDatabaseName("ux_contracts_application")
+                .HasFilter("deleted_at IS NULL");
+
+            entity.Property(e => e.ContractId)
+                .ValueGeneratedNever()
+                .HasColumnName("contract_id");
+
+            entity.Property(e => e.ContractNumber)
+                .HasMaxLength(100)
+                .HasColumnName("contract_number");
+
+            entity.Property(e => e.ContractTemplateId).HasColumnName("contract_template_id");
+            entity.Property(e => e.ApplicationId).HasColumnName("application_id");
+            entity.Property(e => e.StatusId).HasColumnName("status_id");
+
+            entity.Property(e => e.GeneratedContentRu).HasColumnName("generated_content_ru");
+            entity.Property(e => e.GeneratedContentKk).HasColumnName("generated_content_kk");
+            entity.Property(e => e.GeneratedContentEn).HasColumnName("generated_content_en");
+
+            entity.Property(e => e.StudentSignedAt).HasColumnName("student_signed_at");
+            entity.Property(e => e.EmployerSignedAt).HasColumnName("employer_signed_at");
+            entity.Property(e => e.UniversitySignedAt).HasColumnName("university_signed_at");
+
+            entity.Property(e => e.StartDate).HasColumnName("start_date");
+            entity.Property(e => e.EndDate).HasColumnName("end_date");
+
+            entity.Property(e => e.CreatedAt).HasColumnName("created_at");
+            entity.Property(e => e.CreatedBy).HasColumnName("created_by");
+            entity.Property(e => e.UpdatedAt).HasColumnName("updated_at");
+            entity.Property(e => e.UpdatedBy).HasColumnName("updated_by");
+            entity.Property(e => e.DeletedAt).HasColumnName("deleted_at");
+            entity.Property(e => e.DeletedBy).HasColumnName("deleted_by");
+
+            entity.HasOne(d => d.ContractTemplate)
+                .WithMany(p => p.Contracts)
+                .HasForeignKey(d => d.ContractTemplateId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_contracts_template");
+
+            entity.HasOne(d => d.Application)
+                .WithOne(p => p.Contract)
+                .HasForeignKey<Contract>(d => d.ApplicationId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_contracts_application");
+
+            entity.HasOne(d => d.Status)
+                .WithMany(p => p.Contracts)
+                .HasForeignKey(d => d.StatusId)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("fk_contracts_status");
         });
 
         OnModelCreatingPartial(modelBuilder);

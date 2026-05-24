@@ -279,4 +279,110 @@ public class ApplicationRepository(InternshipPracticeDbContext dbContext): IAppl
                     $"Ошибка при отзыве заявки: {ex.Message}"));
         }
     }
+
+    public async Task<Result> ApproveApplicationWithoutSave(Guid userId, Guid applicationId)
+    {
+        try
+        {
+            var application = await dbContext.Applications
+                .Include(a => a.ApplicationStatus)
+                .Include(a => a.Vacancy)
+                    .ThenInclude(v => v.Employer)
+                .FirstOrDefaultAsync(a =>
+                    a.ApplicationId == applicationId &&
+                    a.DeletedAt == null);
+
+            if (application is null)
+            {
+                return Result.Failure(new Error(Domain.Common.Error.NotFound, "Заявка не найдена"));
+            }
+
+            if (application.Vacancy?.Employer?.UserId != userId)
+            {
+                return Result.Failure(new Error(Domain.Common.Error.Forbidden, "Вы не можете изменить статус заявки на чужую вакансию"));
+            }
+
+            if (application.ApplicationStatus.Code != "under_review")
+            {
+                return Result.Failure(new Error(Domain.Common.Error.BadRequest, "Заявку можно одобрить только если она находится на рассмотрении"));
+            }
+
+            var newStatusId = await dbContext.ApplicationStatuses
+                .Where(s => s.Code == "approved" && s.DeletedAt == null)
+                .Select(s => s.ApplicationStatusId)
+                .FirstOrDefaultAsync();
+
+            if (newStatusId == Guid.Empty)
+            {
+                return Result.Failure(new Error(Domain.Common.Error.InternalServerError, $"Статус заявки approved не найден"));
+            }
+
+            application.StatusId = newStatusId;
+            application.UpdatedAt = DateTime.UtcNow;
+            application.UpdatedBy = userId;
+            
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure(
+                new Error(
+                    Domain.Common.Error.InternalServerError,
+                    $"Ошибка при изменении статуса заявки: {ex.Message}"));
+        }
+    }
+
+    public async Task<Result> RejectApplication(Guid userId, Guid applicationId)
+    {
+        try
+        {
+            var application = await dbContext.Applications
+                .Include(a => a.ApplicationStatus)
+                .Include(a => a.Vacancy)
+                .ThenInclude(v => v.Employer)
+                .FirstOrDefaultAsync(a =>
+                    a.ApplicationId == applicationId &&
+                    a.DeletedAt == null);
+
+            if (application is null)
+            {
+                return Result.Failure(new Error(Domain.Common.Error.NotFound, "Заявка не найдена"));
+            }
+
+            if (application.Vacancy?.Employer?.UserId != userId)
+            {
+                return Result.Failure(new Error(Domain.Common.Error.Forbidden, "Вы не можете изменить статус заявки на чужую вакансию"));
+            }
+
+            if (application.ApplicationStatus.Code != "under_review")
+            {
+                return Result.Failure(new Error(Domain.Common.Error.BadRequest, "Заявку можно одобрить только если она находится на рассмотрении"));
+            }
+
+            var newStatusId = await dbContext.ApplicationStatuses
+                .Where(s => s.Code == "rejected" && s.DeletedAt == null)
+                .Select(s => s.ApplicationStatusId)
+                .FirstOrDefaultAsync();
+
+            if (newStatusId == Guid.Empty)
+            {
+                return Result.Failure(new Error(Domain.Common.Error.InternalServerError, $"Статус заявки rejected не найден"));
+            }
+
+            application.StatusId = newStatusId;
+            application.UpdatedAt = DateTime.UtcNow;
+            application.UpdatedBy = userId;
+
+            await dbContext.SaveChangesAsync();
+
+            return Result.Success();
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure(
+                new Error(
+                    Domain.Common.Error.InternalServerError,
+                    $"Ошибка при изменении статуса заявки: {ex.Message}"));
+        }
+    }
 }

@@ -1,6 +1,8 @@
 ﻿using System.Security.Claims;
 using InternshipPractice.Api.Requests;
+using InternshipPractice.Application.Commands.ApproveApplication;
 using InternshipPractice.Application.Commands.CreateApplication;
+using InternshipPractice.Application.Commands.RejectApplication;
 using InternshipPractice.Application.Commands.WithdrawApplication;
 using InternshipPractice.Application.Queries.GetApplicationsByStatus;
 using Microsoft.AspNetCore.Authorization;
@@ -60,6 +62,39 @@ public class ApplicationController : BaseController
             new WithdrawApplicationCommand(
                 userId,
                 applicationId));
+
+        if (result.IsFailed)
+            return ProblemResponse(result.Error);
+
+        return Ok();
+    }
+    
+    [HttpPost("{applicationId:guid}/approve")]
+    public async Task<IActionResult> ApproveApplication(Guid applicationId)
+    {
+        var userIdValue = User.FindFirstValue("UserId");
+
+        if (!Guid.TryParse(userIdValue, out var userId))
+            return Unauthorized();
+
+        var result = await Mediator.Send(new ApproveApplicationCommand(userId, applicationId));
+
+        if (result.IsFailed)
+            return ProblemResponse(result.Error);
+
+        return Ok();
+    }
+
+
+    [HttpPost("{applicationId:guid}/reject")]
+    public async Task<IActionResult> RejectApplication(Guid applicationId)
+    {
+        var userIdValue = User.FindFirstValue("UserId");
+
+        if (!Guid.TryParse(userIdValue, out var userId))
+            return Unauthorized();
+
+        var result = await Mediator.Send(new RejectApplicationCommand(userId, applicationId));
 
         if (result.IsFailed)
             return ProblemResponse(result.Error);
