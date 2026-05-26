@@ -9,4 +9,4 @@ public record GetContractsByUserIdQuery(
     string Lang,
     int Page,
     int PageSize
-) : IRequest<Result<PagedResult<VacancySearchResponse>>>;
+) : IRequest<Result<PagedResult<ContractResponse>>>;

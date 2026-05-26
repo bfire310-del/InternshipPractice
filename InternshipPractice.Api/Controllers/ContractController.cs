@@ -1,8 +1,10 @@
 ﻿using System.Security.Claims;
+using InternshipPractice.Application.Queries.DownloadContract;
 using InternshipPractice.Application.Queries.GetActiveContractsCount;
 using InternshipPractice.Application.Queries.GetCompletedContractsCount;
+using InternshipPractice.Application.Queries.GetContractDetails;
 using InternshipPractice.Application.Queries.GetContractsByUserId;
-using InternshipPractice.Application.Queries.GetContractsCount;
+using InternshipPractice.Application.Queries.GetWaitingForSignContractsCount;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -15,10 +17,39 @@ public class ContractController : BaseController
 {
     
     [HttpGet("by-user")]
-    public async Task<IActionResult> GetContractsByUserId(
-        [FromQuery] string lang = "ru",
-        [FromQuery] int page = 1,
-        [FromQuery] int pageSize = 5)
+    public async Task<IActionResult> GetContractsByUserId([FromQuery] string lang = "ru", [FromQuery] int page = 1, [FromQuery] int pageSize = 5)
+    {
+        var userIdValue = User.FindFirstValue("UserId");
+
+        if (!Guid.TryParse(userIdValue, out var userId))
+            return Unauthorized();
+
+        var result = await Mediator.Send(new GetContractsByUserIdQuery(userId, lang, page, pageSize));
+
+        if (result.IsFailed)
+            return ProblemResponse(result.Error);
+
+        return Ok(result.Value);
+    }
+    
+    [HttpGet("details")]
+    public async Task<IActionResult> GetContractDetails([FromQuery] Guid contractId, [FromQuery] string lang = "ru")
+    {
+        var userIdValue = User.FindFirstValue("UserId");
+
+        if (!Guid.TryParse(userIdValue, out var userId))
+            return Unauthorized();
+
+        var result = await Mediator.Send(new GetContractDetailsQuery(userId, lang, contractId));
+
+        if (result.IsFailed)
+            return ProblemResponse(result.Error);
+
+        return Ok(result.Value);
+    }
+    
+    [HttpGet("download")]
+    public async Task<IActionResult> DownloadContract([FromQuery] Guid contractId, [FromQuery] string lang = "ru")
     {
         var userIdValue = User.FindFirstValue("UserId");
 
@@ -26,28 +57,15 @@ public class ContractController : BaseController
             return Unauthorized();
 
         var result = await Mediator.Send(
-            new GetContractsByUserIdQuery(userId, lang, page, pageSize));
+            new DownloadContractQuery(userId, lang,  contractId));
 
         if (result.IsFailed)
             return ProblemResponse(result.Error);
 
-        return Ok(result.Value);
-    }
-
-    [HttpGet("count")]
-    public async Task<IActionResult> GetContractsCount()
-    {
-        var userIdValue = User.FindFirstValue("UserId");
-
-        if (!Guid.TryParse(userIdValue, out var userId))
-            return Unauthorized();
-
-        var result = await Mediator.Send(new GetContractsCountQuery(userId));
-
-        if (result.IsFailed)
-            return ProblemResponse(result.Error);
-
-        return Ok(result.Value);
+        return File(
+            result.Value.FileBytes,
+            result.Value.ContentType,
+            result.Value.FileName);
     }
 
     [HttpGet("count-active")]
@@ -59,6 +77,22 @@ public class ContractController : BaseController
             return Unauthorized();
 
         var result = await Mediator.Send(new GetActiveContractsCountQuery(userId));
+
+        if (result.IsFailed)
+            return ProblemResponse(result.Error);
+
+        return Ok(result.Value);
+    }
+
+    [HttpGet("count-waiting-sign")]
+    public async Task<IActionResult> GetWaitingForSignContractsCount()
+    {
+        var userIdValue = User.FindFirstValue("UserId");
+
+        if (!Guid.TryParse(userIdValue, out var userId))
+            return Unauthorized();
+
+        var result = await Mediator.Send(new GetWaitingForSignContractsCountQuery(userId));
 
         if (result.IsFailed)
             return ProblemResponse(result.Error);

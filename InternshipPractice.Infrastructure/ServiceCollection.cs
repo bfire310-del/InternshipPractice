@@ -38,6 +38,7 @@ public static class ServiceCollection
         services.AddScoped<IApplicationService, ApplicationService>();
         services.AddScoped<ITypeOfEmploymentRepository, TypeOfEmploymentRepository>();
         services.AddScoped<IPracticeFormRepository, PracticeFormRepository>();
+        services.AddScoped<IFileGeneratorService, FileGeneratorService>();
         return services;
     }
 }
