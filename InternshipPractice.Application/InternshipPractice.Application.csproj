@@ -7,6 +7,12 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Queries\Новая папка1\**" />
+    <EmbeddedResource Remove="Queries\Новая папка1\**" />
+    <None Remove="Queries\Новая папка1\**" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="KDS.Primitives.FluentResult" Version="1.0.0" />
     <PackageReference Include="MediatR" Version="12.2.0" />
     <PackageReference Include="Microsoft.Extensions.Configuration.Abstractions" Version="9.0.0" />
@@ -15,6 +21,11 @@
 
   <ItemGroup>
     <ProjectReference Include="..\InternshipPractice.Domain\InternshipPractice.Domain.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Queries\Новая папка2\" />
+    <Folder Include="Queries\Новая папка\" />
   </ItemGroup>
 
 </Project>
