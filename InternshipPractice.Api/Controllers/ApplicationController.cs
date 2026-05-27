@@ -5,6 +5,7 @@ using InternshipPractice.Application.Commands.CreateApplication;
 using InternshipPractice.Application.Commands.RejectApplication;
 using InternshipPractice.Application.Commands.WithdrawApplication;
 using InternshipPractice.Application.Queries.GetApplicationsByStatus;
+using InternshipPractice.Application.Queries.GetEmployerApplications;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
@@ -49,7 +50,27 @@ public class ApplicationController : BaseController
 
         return Ok(result.Value);
     }
-    
+
+    [HttpGet("employer")]
+    public async Task<IActionResult> GetEmployerApplications(
+        [FromQuery] string? statusCode,
+        [FromQuery] string lang = "ru",
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 10)
+    {
+        var userIdValue = User.FindFirstValue("UserId");
+
+        if (!Guid.TryParse(userIdValue, out var userId))
+            return Unauthorized();
+
+        var result = await Mediator.Send(new GetEmployerApplicationsQuery(userId, statusCode, lang, page, pageSize));
+
+        if (result.IsFailed)
+            return ProblemResponse(result.Error);
+
+        return Ok(result.Value);
+    }
+
     [HttpPost("{applicationId:guid}/withdraw")]
     public async Task<IActionResult> WithdrawApplication(Guid applicationId)
     {
