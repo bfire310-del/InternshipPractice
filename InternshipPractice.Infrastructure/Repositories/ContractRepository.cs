@@ -85,16 +85,20 @@ public class ContractRepository(InternshipPracticeDbContext dbContext): IContrac
                 return Result.Failure(new Error(Domain.Common.Error.NotFound, "Статус договора waiting_student_sign не найден"));
             }
 
-            var contractNumber = $"КЗ-{DateTime.UtcNow.Year}-{Random.Shared.Next(1000, 9999)}";
+            var contractNumber = await GenerateContractNumberAsync();
+            
+            var studentFullName = string.Join(" ",
+                new[]
+                    {
+                        application.Student.User.LastName,
+                        application.Student.User.FirstName,
+                        application.Student.User.Patronymic
+                    }
+                    .Where(x => !string.IsNullOrWhiteSpace(x)));
 
-            var studentFullName =
-                $"{application.Student.User.LastName} " +
-                $"{application.Student.User.FirstName} " +
-                $"{application.Student.User.Patronymic}";
-
-            var cityRu = application.Vacancy.Region?.NameRu ?? "Алматы";
-            var cityKk = application.Vacancy.Region?.NameKk ?? cityRu;
-            var cityEn = application.Vacancy.Region?.NameEn ?? cityRu;
+            var companyRegionRu = application.Vacancy.Region?.NameRu ?? "Алматы";
+            var companyRegionKk = application.Vacancy.Region?.NameKk ?? companyRegionRu;
+            var companyRegionEn = application.Vacancy.Region?.NameEn ?? companyRegionRu;
 
             var universityRu = application.Student.Faculty.University.NameRu ?? "";
             var universityKk = application.Student.Faculty.University.NameKk ?? universityRu;
@@ -113,7 +117,7 @@ public class ContractRepository(InternshipPracticeDbContext dbContext): IContrac
             var generatedContentRu = FillTemplate(
                 template.ContentRu,
                 contractNumber,
-                cityRu,
+                companyRegionRu,
                 currentDate,
                 universityRu,
                 companyRu,
@@ -125,7 +129,7 @@ public class ContractRepository(InternshipPracticeDbContext dbContext): IContrac
             var generatedContentKk = FillTemplate(
                 template.ContentKk ?? template.ContentRu,
                 contractNumber,
-                cityKk,
+                companyRegionKk,
                 currentDate,
                 universityKk,
                 companyKk,
@@ -137,7 +141,7 @@ public class ContractRepository(InternshipPracticeDbContext dbContext): IContrac
             var generatedContentEn = FillTemplate(
                 template.ContentEn ?? template.ContentRu,
                 contractNumber,
-                cityEn,
+                companyRegionEn,
                 currentDate,
                 universityEn,
                 companyEn,
@@ -320,6 +324,78 @@ public class ContractRepository(InternshipPracticeDbContext dbContext): IContrac
         }
     }
 
+    public async Task<Result<ContractSignDataResponse>> GetContractSignData(Guid userId, string lang, Guid contractId)
+    {
+         try
+        {
+            var studentId = await dbContext.Students
+                .AsNoTracking()
+                .Where(s => s.UserId == userId && s.DeletedAt == null)
+                .Select(s => s.StudentId)
+                .FirstOrDefaultAsync();
+
+            if (studentId == Guid.Empty)
+            {
+                return Result.Failure<ContractSignDataResponse>(
+                    new Error(
+                        Domain.Common.Error.NotFound,
+                        "Студент для текущего пользователя не найден"));
+            }
+
+            var contract = await dbContext.Contracts
+                .AsNoTracking()
+                .Where(c =>
+                    c.ContractId == contractId &&
+                    c.Application.StudentId == studentId)
+                .Select(c => new
+                {
+                    c.ContractId,
+                    c.ContractNumber,
+                    c.GeneratedContentRu,
+                    c.GeneratedContentKk,
+                    c.GeneratedContentEn
+                })
+                .FirstOrDefaultAsync();
+
+            if (contract is null)
+            {
+                return Result.Failure<ContractSignDataResponse>(
+                    new Error(
+                        Domain.Common.Error.NotFound,
+                        "Договор не найден"));
+            }
+
+            var dataToSign = lang switch
+            {
+                "kk" => contract.GeneratedContentKk,
+                "en" => contract.GeneratedContentEn,
+                _ => contract.GeneratedContentRu
+            };
+
+            if (string.IsNullOrWhiteSpace(dataToSign))
+            {
+                return Result.Failure<ContractSignDataResponse>(
+                    new Error(
+                        Domain.Common.Error.NotFound,
+                        "Содержимое договора для подписания не найдено"));
+            }
+
+            return Result.Success(new ContractSignDataResponse
+            {
+                ContractId = contract.ContractId,
+                ContractNumber = contract.ContractNumber,
+                DataToSign = dataToSign
+            });
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<ContractSignDataResponse>(
+                new Error(
+                    Domain.Common.Error.InternalServerError,
+                    $"Ошибка при получении данных договора для подписания: {ex.Message}"));
+        }
+    }
+
     public async Task<Result<int>> GetActiveContractsCount(Guid userId)
     {
         try
@@ -435,7 +511,7 @@ public class ContractRepository(InternshipPracticeDbContext dbContext): IContrac
     private static string FillTemplate(
         string template,
         string contractNumber,
-        string city,
+        string companyRegion,
         string currentDate,
         string universityName,
         string companyName,
@@ -446,7 +522,7 @@ public class ContractRepository(InternshipPracticeDbContext dbContext): IContrac
     {
         return template
             .Replace("{{contract_number}}", contractNumber)
-            .Replace("{{city}}", city)
+            .Replace("{{city}}", companyRegion)
             .Replace("{{current_date}}", currentDate)
             .Replace("{{university_name}}", universityName)
             .Replace("{{university_representative}}", "Ректор")
@@ -456,11 +532,17 @@ public class ContractRepository(InternshipPracticeDbContext dbContext): IContrac
             .Replace("{{vacancy_title}}", vacancyTitle)
             .Replace("{{start_date}}", startDate)
             .Replace("{{end_date}}", endDate)
-            .Replace("{{university_address}}", "г. Алматы")
-            .Replace("{{university_bin}}", "000000000000")
-            .Replace("{{company_address}}", "г. Алматы")
-            .Replace("{{company_bin}}", "000000000000")
-            .Replace("{{student_address}}", "г. Алматы")
-            .Replace("{{student_iin}}", "000000000000");
+            .Replace("{{university_address}}", companyRegion)
+            .Replace("{{company_address}}", companyRegion)
+            .Replace("{{student_address}}", companyRegion);
+    }
+    
+    private async Task<string> GenerateContractNumberAsync()
+    {
+        var nextValue = await dbContext.Database
+            .SqlQueryRaw<long>("SELECT nextval('contract_number_seq') AS \"Value\"")
+            .SingleAsync();
+
+        return $"КЗ-{DateTime.UtcNow.Year}-{nextValue:D6}";
     }
 }

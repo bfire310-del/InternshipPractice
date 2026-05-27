@@ -78,7 +78,7 @@ public partial class InternshipPracticeDbContext : DbContext
     public virtual DbSet<Contract> Contracts { get; set; }
     public virtual DbSet<ContractTemplate> ContractTemplates { get; set; }
     public virtual DbSet<ContractStatus> ContractStatuses { get; set; }
-
+    public virtual DbSet<ContractSignature> ContractSignatures { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<ActionType>(entity =>
@@ -1337,6 +1337,47 @@ public partial class InternshipPracticeDbContext : DbContext
                 .HasForeignKey(d => d.StatusId)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("fk_contracts_status");
+        });
+        
+        modelBuilder.Entity<ContractSignature>(entity =>
+        {
+            entity.HasKey(e => e.ContractSignatureId)
+                .HasName("contract_signatures_pkey");
+
+            entity.ToTable("contract_signatures");
+
+            entity.Property(e => e.ContractSignatureId)
+                .HasColumnName("contract_signature_id");
+
+            entity.Property(e => e.ContractId)
+                .HasColumnName("contract_id");
+
+            entity.Property(e => e.SignerUserId)
+                .HasColumnName("signer_user_id");
+
+            entity.Property(e => e.SignerType)
+                .HasMaxLength(50)
+                .HasColumnName("signer_type");
+
+            entity.Property(e => e.Lang)
+                .HasMaxLength(10)
+                .HasColumnName("lang");
+
+            entity.Property(e => e.Signature)
+                .HasColumnName("signature");
+
+            entity.Property(e => e.SignedData)
+                .HasColumnName("signed_data");
+
+            entity.Property(e => e.SignedAt)
+                .HasColumnType("timestamp with time zone")
+                .HasColumnName("signed_at");
+
+            entity.HasOne(d => d.Contract)
+                .WithMany(p => p.ContractSignatures)
+                .HasForeignKey(d => d.ContractId)
+                .OnDelete(DeleteBehavior.Cascade)
+                .HasConstraintName("fk_contract_signatures_contract");
         });
 
         OnModelCreatingPartial(modelBuilder);

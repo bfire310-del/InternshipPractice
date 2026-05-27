@@ -21,4 +21,5 @@ public partial class CareerCenter
     public Guid? DeletedBy { get; set; }
 
     public virtual User User { get; set; } = null!;
+    public virtual University University { get; set; } = null!;
 }

@@ -1,9 +1,12 @@
 ﻿using System.Security.Claims;
+using InternshipPractice.Api.Requests;
+using InternshipPractice.Application.Commands.SignContract;
 using InternshipPractice.Application.Queries.DownloadContract;
 using InternshipPractice.Application.Queries.GetActiveContractsCount;
 using InternshipPractice.Application.Queries.GetCompletedContractsCount;
 using InternshipPractice.Application.Queries.GetContractDetails;
 using InternshipPractice.Application.Queries.GetContractsByUserId;
+using InternshipPractice.Application.Queries.GetContractSignData;
 using InternshipPractice.Application.Queries.GetWaitingForSignContractsCount;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -66,6 +69,39 @@ public class ContractController : BaseController
             result.Value.FileBytes,
             result.Value.ContentType,
             result.Value.FileName);
+    }
+    
+    [HttpGet("sign-data")]
+    public async Task<IActionResult> GetContractSignData([FromQuery] Guid contractId, [FromQuery] string lang = "ru")
+    {
+        var userIdValue = User.FindFirstValue("UserId");
+
+        if (!Guid.TryParse(userIdValue, out var userId))
+            return Unauthorized();
+
+        var result = await Mediator.Send(new GetContractSignDataQuery(userId, lang, contractId));
+
+        if (result.IsFailed)
+            return ProblemResponse(result.Error);
+
+        return Ok(result.Value);
+    }
+    
+    [HttpPost("sign")]
+    public async Task<IActionResult> SignContract([FromBody] SignContractRequest request)
+    {
+        var userIdValue = User.FindFirstValue("UserId");
+
+        if (!Guid.TryParse(userIdValue, out var userId))
+            return Unauthorized();
+
+        var result = await Mediator.Send(
+            new SignContractCommand(userId, request.ContractId, request.Signature, request.Lang));
+
+        if (result.IsFailed)
+            return ProblemResponse(result.Error);
+
+        return Ok(result.Value);
     }
 
     [HttpGet("count-active")]
