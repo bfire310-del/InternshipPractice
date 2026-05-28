@@ -4,11 +4,11 @@ using MediatR;
 
 namespace InternshipPractice.Application.Queries.GetCompletedContractsCount;
 
-public class GetCompletedContractsCountQueryHandler(IRegionRepository regionRepository) : IRequestHandler<GetCompletedContractsCountQuery, Result<int>>
+public class GetCompletedContractsCountQueryHandler(IContractRepository contractRepository) : IRequestHandler<GetCompletedContractsCountQuery, Result<int>>
 {
     public async Task<Result<int>> Handle(GetCompletedContractsCountQuery request, CancellationToken cancellationToken)
     {
-        var result = await regionRepository.GetRegionCount();
+        var result = await contractRepository.GetCompletedContractsCount(request.UserId);
         return result;
     }
 }

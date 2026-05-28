@@ -23,4 +23,5 @@ public partial class University
     public Guid? DeletedBy { get; set; }
 
     public virtual ICollection<Faculty> Faculties { get; set; } = new List<Faculty>();
+    public virtual ICollection<CareerCenter> CareerCenters { get; set; } = new List<CareerCenter>();
 }

@@ -5,10 +5,11 @@ using MediatR;
 
 namespace InternshipPractice.Application.Queries.GetContractsByUserId;
 
-public class GetContractsByUserIdQueryHandler(IVacancyRepository vacancyRepository) : IRequestHandler<GetContractsByUserIdQuery, Result<PagedResult<VacancySearchResponse>>>
+public class GetContractsByUserIdQueryHandler(IContractRepository contractRepository) : IRequestHandler<GetContractsByUserIdQuery, Result<PagedResult<ContractResponse>>>
 {
-    public async Task<Result<PagedResult<VacancySearchResponse>>> Handle(GetContractsByUserIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<ContractResponse>>> Handle(GetContractsByUserIdQuery request, CancellationToken cancellationToken)
     {
-        return Result.Failure<PagedResult<VacancySearchResponse>>(new Error("", ""));
+        var result = await contractRepository.GetContractsByUserId(request.UserId, request.Lang, request.Page, request.PageSize);
+        return result;
     }
 }

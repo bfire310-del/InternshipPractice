@@ -43,4 +43,5 @@ public partial class Contract
     public virtual Application Application { get; set; } = null!;
 
     public virtual ContractStatus Status { get; set; } = null!;
+    public virtual ICollection<ContractSignature> ContractSignatures { get; set; } = new List<ContractSignature>();
 }
