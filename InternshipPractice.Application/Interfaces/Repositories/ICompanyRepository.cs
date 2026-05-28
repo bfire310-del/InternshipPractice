@@ -8,4 +8,13 @@ public interface ICompanyRepository
     Task<Result<List<string?>>> GetCompanyNameList(string lang);
     Task<Result<int>> GetCompanyCount();
     Task<Result<List<CompanyResponse>>> GetAll();
+    Task<Result<PagedResult<CompanySearchResponse>>> GetFilteredCompanyNamesAsync(
+        string? query,
+        Guid? regionId,
+        Guid? categoryId,
+        string lang,
+        int page,
+        int pageSize,
+        Guid userId,
+        CancellationToken ct);
 }

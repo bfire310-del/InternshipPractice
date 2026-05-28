@@ -14,6 +14,7 @@ public class GetFilteredVacancyNameListQueryHandler(IVacancyRepository vacancyRe
             request.PaymentTypeId,
             request.DurationCode,
             request.CategoryId,
+            request.CompanyId,
             request.Lang,
             request.Page,
             request.PageSize,

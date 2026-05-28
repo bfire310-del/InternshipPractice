@@ -23,7 +23,7 @@ public partial class Employer
     public Guid? DeletedBy { get; set; }
 
     public virtual Company? Company { get; set; }
-
+    public virtual ICollection<Vacancy> Vacancies { get; set; } = new List<Vacancy>();
     public virtual ICollection<EmployerAssesment> EmployerAssesments { get; set; } = new List<EmployerAssesment>();
 
     public virtual User? User { get; set; }

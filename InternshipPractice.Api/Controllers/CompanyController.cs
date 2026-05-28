@@ -1,6 +1,10 @@
-﻿using InternshipPractice.Application.Queries.GetAllCompanies;
+﻿using System.Security.Claims;
+using InternshipPractice.Api.Requests;
+using InternshipPractice.Application.Queries.GetAllCompanies;
 using InternshipPractice.Application.Queries.GetCompanyCount;
 using InternshipPractice.Application.Queries.GetCompanyNameList;
+using InternshipPractice.Application.Queries.GetFilteredCompanyNameList;
+using InternshipPractice.Application.Queries.GetFilteredVacancyNameList;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InternshipPractice.Api.Controllers;
@@ -36,6 +40,29 @@ public class CompanyController : BaseController
     {
         var result = await Mediator.Send(new GetAllCompaniesQuery());
 
+        if (result.IsFailed)
+            return ProblemResponse(result.Error);
+
+        return Ok(result.Value);
+    }
+    
+    [HttpPost("filtered")]
+    public async Task<IActionResult> GetFilteredCompanies(CompanySearchRequest request)
+    {
+        var userIdValue = User.FindFirstValue("UserId");
+
+        if (!Guid.TryParse(userIdValue, out var userId))
+            return Unauthorized();
+        
+        var result = await Mediator.Send(new GetFilteredCompanyNameListQuery(
+            request.Query,
+            request.RegionId,
+            request.CategoryId,
+            request.Lang,
+            request.Page,
+            request.PageSize,
+            userId));
+        
         if (result.IsFailed)
             return ProblemResponse(result.Error);
 

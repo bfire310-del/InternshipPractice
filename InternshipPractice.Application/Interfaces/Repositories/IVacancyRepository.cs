@@ -15,6 +15,7 @@ public interface IVacancyRepository
         Guid? paymentTypeId,
         string? durationCode,
         Guid? categoryId,
+        Guid? companyId,
         string lang,
         int page,
         int pageSize,

@@ -43,6 +43,7 @@ public class VacancyRepository(InternshipPracticeDbContext dbContext): IVacancyR
         Guid? paymentTypeId,
         string? durationCode,
         Guid? categoryId,
+        Guid? companyId,
         string lang,
         int page,
         int pageSize,
@@ -68,6 +69,9 @@ public class VacancyRepository(InternshipPracticeDbContext dbContext): IVacancyR
 
             if (paymentTypeId is not null)
                 q = q.Where(v => v.PaymentTypeId == paymentTypeId);
+            
+            if (companyId is not null)
+                q = q.Where(v => v.Employer!.CompanyId == companyId);
 
             if (!string.IsNullOrWhiteSpace(durationCode))
             {

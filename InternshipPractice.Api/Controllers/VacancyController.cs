@@ -39,7 +39,6 @@ public class VacancyController : BaseController
         return Ok(result.Value);
     }
     
-    
     [HttpPost("filtered")]
     [Authorize]
     public async Task<IActionResult> GetFilteredVacancies(VacancySearchRequest request)
@@ -55,6 +54,7 @@ public class VacancyController : BaseController
             request.PaymentTypeId,
             request.DurationCode,
             request.CategoryId,
+            request.CompanyId,
             request.Lang,
             request.Page,
             request.PageSize,

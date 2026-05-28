@@ -42,6 +42,7 @@ public static class ServiceCollection
         services.AddScoped<IFileGeneratorService, FileGeneratorService>();
         services.AddScoped<IContractService, ContractService>();
         services.AddScoped<IContractSignatureVerifier, ContractSignatureVerifier>();
+        services.AddScoped<ICompanyCategoryRepository, CompanyCategoryRepository>();
         return services;
     }
 }

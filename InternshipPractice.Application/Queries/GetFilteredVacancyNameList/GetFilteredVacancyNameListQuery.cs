@@ -10,6 +10,7 @@ public record GetFilteredVacancyNameListQuery(
     Guid? PaymentTypeId,
     string? DurationCode,
     Guid? CategoryId,
+    Guid? CompanyId,
     string Lang,
     int Page,
     int PageSize,
