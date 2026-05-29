@@ -49,6 +49,7 @@ public class EmployerApplicationRepository(InternshipPracticeDbContext dbContext
                 .Select(a => new
                 {
                     a.ApplicationId,
+                    ContractId = dbContext.Contracts.FirstOrDefault(x => x.ApplicationId == a.ApplicationId) == null ? Guid.Empty : dbContext.Contracts.FirstOrDefault(x => x.ApplicationId == a.ApplicationId)!.ContractId ,
                     a.VacancyId,
                     a.StudentId,
                     StudentUserId = (Guid?)a.Student.UserId,
@@ -89,6 +90,7 @@ public class EmployerApplicationRepository(InternshipPracticeDbContext dbContext
             var items = rows.Select(a => new EmployerApplicationResponse
             {
                 ApplicationId = a.ApplicationId,
+                ContractId = a.ContractId,
                 VacancyId = a.VacancyId,
                 StudentId = a.StudentId,
                 StudentUserId = a.StudentUserId,

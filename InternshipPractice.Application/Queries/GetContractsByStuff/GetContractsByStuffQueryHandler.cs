@@ -3,13 +3,13 @@ using InternshipPractice.Application.Responses;
 using KDS.Primitives.FluentResult;
 using MediatR;
 
-namespace InternshipPractice.Application.Queries.GetContractsByUserId;
+namespace InternshipPractice.Application.Queries.GetContractsByStuff;
 
-public class GetContractsByUserIdQueryHandler(IContractRepository contractRepository) : IRequestHandler<GetContractsByUserIdQuery, Result<PagedResult<ContractResponse>>>
+public class GetContractsByStuffQueryHandler(IContractRepository contractRepository) : IRequestHandler<GetContractsByStuffQuery, Result<PagedResult<ContractResponse>>>
 {
-    public async Task<Result<PagedResult<ContractResponse>>> Handle(GetContractsByUserIdQuery request, CancellationToken cancellationToken)
+    public async Task<Result<PagedResult<ContractResponse>>> Handle(GetContractsByStuffQuery request, CancellationToken cancellationToken)
     {
-        var result = await contractRepository.GetContractsByUserId(request.UserId, request.Lang, request.Page, request.PageSize);
+        var result = await contractRepository.GetContractsByStuff(request.UserId, request.Lang, request.Page, request.PageSize);
         return result;
     }
 }

@@ -2,9 +2,9 @@
 using KDS.Primitives.FluentResult;
 using MediatR;
 
-namespace InternshipPractice.Application.Queries.GetContractsByUserId;
+namespace InternshipPractice.Application.Queries.GetContractsByStuff;
 
-public record GetContractsByUserIdQuery(
+public record GetContractsByStuffQuery(
     Guid UserId,
     string Lang,
     int Page,

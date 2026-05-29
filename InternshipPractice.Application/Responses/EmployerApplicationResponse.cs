@@ -3,6 +3,7 @@
 public class EmployerApplicationResponse
 {
     public Guid ApplicationId { get; init; }
+    public Guid? ContractId { get; init; }
     public Guid? VacancyId { get; init; }
     public Guid? StudentId { get; init; }
     public Guid? StudentUserId { get; init; }

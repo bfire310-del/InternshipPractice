@@ -5,6 +5,7 @@ using InternshipPractice.Application.Queries.DownloadContract;
 using InternshipPractice.Application.Queries.GetActiveContractsCount;
 using InternshipPractice.Application.Queries.GetCompletedContractsCount;
 using InternshipPractice.Application.Queries.GetContractDetails;
+using InternshipPractice.Application.Queries.GetContractsByStuff;
 using InternshipPractice.Application.Queries.GetContractsByUserId;
 using InternshipPractice.Application.Queries.GetContractSignData;
 using InternshipPractice.Application.Queries.GetWaitingForSignContractsCount;
@@ -28,6 +29,22 @@ public class ContractController : BaseController
             return Unauthorized();
 
         var result = await Mediator.Send(new GetContractsByUserIdQuery(userId, lang, page, pageSize));
+
+        if (result.IsFailed)
+            return ProblemResponse(result.Error);
+
+        return Ok(result.Value);
+    }
+    
+    [HttpGet("by-stuff")]
+    public async Task<IActionResult> GetContractsByStuff([FromQuery] string lang = "ru", [FromQuery] int page = 1, [FromQuery] int pageSize = 5)
+    {
+        var userIdValue = User.FindFirstValue("UserId");
+
+        if (!Guid.TryParse(userIdValue, out var userId))
+            return Unauthorized();
+
+        var result = await Mediator.Send(new GetContractsByStuffQuery(userId, lang, page, pageSize));
 
         if (result.IsFailed)
             return ProblemResponse(result.Error);

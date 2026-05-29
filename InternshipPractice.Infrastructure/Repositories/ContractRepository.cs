@@ -244,6 +244,60 @@ public class ContractRepository(InternshipPracticeDbContext dbContext): IContrac
         }
     }
 
+    public async Task<Result<PagedResult<ContractResponse>>> GetContractsByStuff(Guid userId, string lang, int page, int pageSize)
+    {
+        
+        try
+        {
+            page = page < 1 ? 1 : page;
+            pageSize = pageSize is < 1 or > 100 ? 5 : pageSize;
+            
+            var query = dbContext.Contracts
+                .AsNoTracking();
+
+            var totalCount = await query.CountAsync();
+
+            var contracts = await query
+                .OrderByDescending(c => c.CreatedAt)
+                .Skip((page - 1) * pageSize)
+                .Take(pageSize)
+                .Select(c => new ContractResponse
+                {
+                    ContractId = c.ContractId,
+
+                    Status = lang == "kk"
+                        ? c.Status.NameKk
+                        : lang == "en"
+                            ? c.Status.NameEn
+                            : c.Status.NameRu,
+                    JobTitle = c.Application.Vacancy.JobTitle,
+                    Student = c.Application.Student.User.LastName + " " + c.Application.Student.User.FirstName,
+
+                    CompanyName = lang == "kk"
+                        ? c.Application.Vacancy.Employer!.Company!.CompanyNameKk
+                        : lang == "en"
+                            ? c.Application.Vacancy.Employer!.Company!.CompanyNameEn
+                            : c.Application.Vacancy.Employer!.Company!.CompanyNameRu,
+
+                    StartDate = c.Application.Vacancy.StartDate,
+                    EndDate = c.Application.Vacancy.EndDate
+                })
+                .ToListAsync();
+
+            return Result.Success(new PagedResult<ContractResponse>
+            {
+                Items = contracts,
+                TotalCount = totalCount,
+                Page = page,
+                PageSize = pageSize
+            });
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<PagedResult<ContractResponse>>(new Error(Domain.Common.Error.InternalServerError,$"Ошибка при получении договоров студента: {ex.Message}"));
+        }
+    }
+
     public async Task<Result<ContractDetailResponse>> GetContractDetails(Guid userId, string lang, Guid contractId)
     {
         try
@@ -253,18 +307,17 @@ public class ContractRepository(InternshipPracticeDbContext dbContext): IContrac
                 .Select(s => s.StudentId)
                 .FirstOrDefaultAsync();
 
-            if (studentId == Guid.Empty)
-            {
-                return Result.Failure<ContractDetailResponse>(
-                    new Error(Domain.Common.Error.NotFound,
-                        "Студент для текущего пользователя не найден"));
-            }
+            //if (studentId == Guid.Empty)
+            //{
+                //return Result.Failure<ContractDetailResponse>(
+              //      new Error(Domain.Common.Error.NotFound,
+             //           "Студент для текущего пользователя не найден"));
+            //}
             
             var contract = await dbContext.Contracts
                 .AsNoTracking()
                 .Where(c =>
-                    c.ContractId == contractId &&
-                    c.Application.StudentId == studentId)
+                    c.ContractId == contractId)
                 .Select(c => new ContractDetailResponse
                 {
                     ContractId = c.ContractId,
@@ -328,25 +381,10 @@ public class ContractRepository(InternshipPracticeDbContext dbContext): IContrac
     {
          try
         {
-            var studentId = await dbContext.Students
-                .AsNoTracking()
-                .Where(s => s.UserId == userId && s.DeletedAt == null)
-                .Select(s => s.StudentId)
-                .FirstOrDefaultAsync();
-
-            if (studentId == Guid.Empty)
-            {
-                return Result.Failure<ContractSignDataResponse>(
-                    new Error(
-                        Domain.Common.Error.NotFound,
-                        "Студент для текущего пользователя не найден"));
-            }
-
             var contract = await dbContext.Contracts
                 .AsNoTracking()
                 .Where(c =>
-                    c.ContractId == contractId &&
-                    c.Application.StudentId == studentId)
+                    c.ContractId == contractId)
                 .Select(c => new
                 {
                     c.ContractId,
