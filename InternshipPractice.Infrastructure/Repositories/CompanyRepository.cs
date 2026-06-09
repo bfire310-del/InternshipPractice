@@ -187,4 +187,54 @@ public class CompanyRepository(InternshipPracticeDbContext dbContext): ICompanyR
             PageSize = pageSize
         });
     }
+
+    public async Task<Result<List<CompanyForCareerResponse>>> GetCompaniesForCareer()
+    {
+        try
+        {
+            return  await dbContext.Companies
+            .Select(c => new CompanyForCareerResponse
+            {
+                CompanyId = c.CompanyId,
+
+                CompanyName = c.CompanyNameRu,
+                Description = c.CompanyDescriptionRu,
+
+                RegionId = c.RegionId,
+                RegionName = c.Region.NameRu,
+
+                CompanyCategoryId = c.CompanyCategoryId,
+                CompanyCategoryName = c.CompanyCategory.NameRu,
+
+                VacanciesCount = dbContext.Vacancies
+                    .Count(v => v.Employer.CompanyId == c.CompanyId),
+
+                ContactFirstName = dbContext.Employers
+                    .Where(e => e.CompanyId == c.CompanyId)
+                    .Select(e => e.User.FirstName)
+                    .FirstOrDefault(),
+
+                ContactLastName = dbContext.Employers
+                    .Where(e => e.CompanyId == c.CompanyId)
+                    .Select(e => e.User.LastName)
+                    .FirstOrDefault(),
+
+                ContactEmail = dbContext.Employers
+                    .Where(e => e.CompanyId == c.CompanyId)
+                    .Select(e => e.User.Email)
+                    .FirstOrDefault(),
+
+                ContactPhone = dbContext.Employers
+                    .Where(e => e.CompanyId == c.CompanyId)
+                    .Select(e => e.User.PhoneNumber)
+                    .FirstOrDefault(),
+            })
+            .ToListAsync();
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<List<CompanyForCareerResponse>>(
+            new Error(Domain.Common.Error.InternalServerError, ex.Message));
+        }
+    }
 }
