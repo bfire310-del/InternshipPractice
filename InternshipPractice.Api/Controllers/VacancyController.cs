@@ -2,6 +2,7 @@
 using InternshipPractice.Api.Requests;
 using InternshipPractice.Application.Queries;
 using InternshipPractice.Application.Queries.GetActiveVacanciesByCompanyId;
+using InternshipPractice.Application.Queries.GetCurrentVacancy;
 using InternshipPractice.Application.Queries.GetFilteredVacancyNameList;
 using InternshipPractice.Application.Queries.GetVacanciesByEmployerId;
 using InternshipPractice.Application.Queries.GetVacancyByLikeWord;
@@ -76,6 +77,23 @@ public class VacancyController : BaseController
             return Unauthorized();
 
         var result = await Mediator.Send(new GetVacancyDetailsByIdQuery(id, userId));
+
+        if (result.IsFailed)
+            return ProblemResponse(result.Error);
+
+        return Ok(result.Value);
+    }
+    
+    [HttpGet("current")]
+    [Authorize]
+    public async Task<IActionResult> GetCurrentVacancy()
+    {
+        var userIdValue = User.FindFirstValue("UserId");
+
+        if (!Guid.TryParse(userIdValue, out var userId))
+            return Unauthorized();
+
+        var result = await Mediator.Send(new GetCurrentVacancyQuery(userId));
 
         if (result.IsFailed)
             return ProblemResponse(result.Error);

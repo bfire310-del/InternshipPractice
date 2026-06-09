@@ -79,6 +79,7 @@ public partial class InternshipPracticeDbContext : DbContext
     public virtual DbSet<ContractTemplate> ContractTemplates { get; set; }
     public virtual DbSet<ContractStatus> ContractStatuses { get; set; }
     public virtual DbSet<ContractSignature> ContractSignatures { get; set; }
+    public virtual DbSet<DiaryEntry> DiaryEntries { get; set; }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<ActionType>(entity =>
@@ -1378,6 +1379,56 @@ public partial class InternshipPracticeDbContext : DbContext
                 .HasForeignKey(d => d.ContractId)
                 .OnDelete(DeleteBehavior.Cascade)
                 .HasConstraintName("fk_contract_signatures_contract");
+        });
+        
+        modelBuilder.Entity<DiaryEntry>(entity =>
+        {
+            entity.HasKey(e => e.DiaryEntryId);
+
+            entity.ToTable("diary_entries");
+
+            entity.Property(e => e.DiaryEntryId)
+                .ValueGeneratedNever()
+                .HasColumnName("diary_entry_id");
+
+            entity.Property(e => e.ApplicationId)
+                .HasColumnName("application_id");
+
+            entity.Property(e => e.WorkDate)
+                .HasColumnName("work_date");
+
+            entity.Property(e => e.Attendance)
+                .HasMaxLength(50)
+                .HasColumnName("attendance");
+
+            entity.Property(e => e.TaskName)
+                .HasColumnName("task_name");
+
+            entity.Property(e => e.Description)
+                .HasColumnName("description");
+
+            entity.Property(e => e.CreatedAt)
+                .HasColumnName("created_at");
+
+            entity.Property(e => e.CreatedBy)
+                .HasColumnName("created_by");
+
+            entity.Property(e => e.UpdatedAt)
+                .HasColumnName("updated_at");
+
+            entity.Property(e => e.UpdatedBy)
+                .HasColumnName("updated_by");
+
+            entity.Property(e => e.DeletedAt)
+                .HasColumnName("deleted_at");
+
+            entity.Property(e => e.DeletedBy)
+                .HasColumnName("deleted_by");
+
+            entity.HasOne(d => d.Application)
+                .WithMany(p => p.DiaryEntries)
+                .HasForeignKey(d => d.ApplicationId)
+                .HasConstraintName("fk_diary_entries_contract");
         });
 
         OnModelCreatingPartial(modelBuilder);

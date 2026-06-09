@@ -139,6 +139,39 @@ public class ContractService(InternshipPracticeDbContext dbContext, IContractSig
         contract.StatusId = nextStatusId;
         contract.UpdatedAt = DateTime.UtcNow;
 
+        if (nextStatusCode == "fully_signed")
+        {
+            var practiceStatusId = await dbContext.ApplicationStatuses
+                .Where(s => s.Code == "contract_signed" && s.DeletedAt == null)
+                .Select(s => s.ApplicationStatusId)
+                .FirstOrDefaultAsync(cancellationToken);
+
+            if (practiceStatusId == Guid.Empty)
+            {
+                return Result.Failure<SignContractResponse>(
+                    new Error(
+                        Domain.Common.Error.NotFound,
+                        "Статус практики contract_signed не найден"));
+            }
+
+            var practice = await dbContext.Applications
+                .FirstOrDefaultAsync(p =>
+                        p.ApplicationId == contract.ApplicationId &&
+                        p.DeletedAt == null,
+                    cancellationToken);
+
+            if (practice is null)
+            {
+                return Result.Failure<SignContractResponse>(
+                    new Error(
+                        Domain.Common.Error.NotFound,
+                        "Практика по договору не найдена"));
+            }
+
+            practice.StatusId = practiceStatusId;
+            practice.UpdatedAt = DateTime.UtcNow;
+        }
+        
         await dbContext.SaveChangesAsync(cancellationToken);
 
         return Result.Success(new SignContractResponse
