@@ -8,4 +8,5 @@ public interface ICompanyRepository
     Task<Result<List<string?>>> GetCompanyNameList(string lang);
     Task<Result<int>> GetCompanyCount();
     Task<Result<List<CompanyResponse>>> GetAll();
+    Task<Result<List<CompanyForCareerResponse>>> GetCompaniesForCareer();
 }
