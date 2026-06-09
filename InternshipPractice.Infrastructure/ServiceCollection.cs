@@ -1,6 +1,8 @@
-﻿using InternshipPractice.Application.Interfaces.Repositories;
+﻿using InternshipPractice.Application.Interfaces.HttpClients;
+using InternshipPractice.Application.Interfaces.Repositories;
 using InternshipPractice.Application.Interfaces.Services;
 using InternshipPractice.Infrastructure.Data;
+using InternshipPractice.Infrastructure.HttpClients;
 using InternshipPractice.Infrastructure.Options;
 using InternshipPractice.Infrastructure.Repositories;
 using InternshipPractice.Infrastructure.Services;
@@ -34,6 +36,7 @@ public static class ServiceCollection
         services.AddScoped<IEmployerApplicationRepository, EmployerApplicationRepository>();
         services.AddScoped<IContractRepository, ContractRepository>();
         services.Configure<JwtOptions>(configuration.GetSection("JwtSettings"));
+        services.Configure<AccessOptions>(configuration.GetSection(AccessOptions.SectionName));
         services.AddScoped<IJwtService, JwtService>();
         services.AddScoped<IWorkFormatRepository, WorkFormatRepository>();
         services.AddScoped<IApplicationService, ApplicationService>();
@@ -43,6 +46,7 @@ public static class ServiceCollection
         services.AddScoped<IContractService, ContractService>();
         services.AddScoped<IContractSignatureVerifier, ContractSignatureVerifier>();
         services.AddScoped<ICompanyCategoryRepository, CompanyCategoryRepository>();
+        services.AddHttpClient<IAccessHttpClient, AccessHttpClient>();
         return services;
     }
 }
