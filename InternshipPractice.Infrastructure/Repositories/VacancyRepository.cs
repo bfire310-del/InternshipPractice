@@ -407,6 +407,46 @@ public class VacancyRepository(InternshipPracticeDbContext dbContext): IVacancyR
         }
     }
 
+    public async Task<Result<CurrentVacancyResponse>> GetCurrentVacancy(Guid userId)
+    {
+        try
+        {
+            var result = await dbContext.Applications
+                .AsNoTracking()
+                .Where(p =>
+                    p.DeletedAt == null &&
+                    p.Student.UserId == userId &&
+                    p.ApplicationStatus.Code == "contract_signed")
+                .Select(p => new CurrentVacancyResponse
+                {
+                    VacancyId = p.VacancyId,
+                    CompanyName = p.Vacancy.Employer.Company.CompanyNameRu,
+                    JobTitle = p.Vacancy.JobTitle,
+                    StartDate = p.Vacancy.StartDate,
+                    EndDate = p.Vacancy.EndDate,
+                    SupervisorFullName = p.Vacancy.Employer.User.FirstName + " " + p.Vacancy.Employer.User.LastName + " " + p.Vacancy.Employer.User.Patronymic,
+                })
+                .FirstOrDefaultAsync();
+
+            if (result is null)
+            {
+                return Result.Failure<CurrentVacancyResponse>(
+                    new Error(
+                        Domain.Common.Error.NotFound,
+                        "Активная практика не найдена"));
+            }
+
+            return Result.Success(result);
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<CurrentVacancyResponse>(
+                new Error(
+                    Domain.Common.Error.InternalServerError,
+                    ex.Message));
+        }
+    }
+
     public async Task<Result<int>> GetActiveVacanciesByUserId(Guid userId)
     {
         try

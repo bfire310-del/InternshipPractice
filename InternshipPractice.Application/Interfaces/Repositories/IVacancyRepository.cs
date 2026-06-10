@@ -25,6 +25,7 @@ public interface IVacancyRepository
     Task<Result<int>> GetActiveVacanciesCountByCompanyId(Guid companyId);
     Task<Result<List<VacancySearchResponse>>> GetVacanciesByEmployerId(Guid employerId);
     Task<Result<VacancyDetailResponse>> GetVacancyDetailsById(Guid id, Guid userId);
+    Task<Result<CurrentVacancyResponse>> GetCurrentVacancy(Guid userId);
     Task<Result<int>> GetActiveVacanciesByUserId(Guid userId);
     Task<Result<List<GetMyVacanciesResponse>>> GetMyVacancies(Guid userId);
     Task<Result> AddAsync(CreateVacancyRequest request);

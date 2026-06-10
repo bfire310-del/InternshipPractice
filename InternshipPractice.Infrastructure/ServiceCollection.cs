@@ -47,6 +47,7 @@ public static class ServiceCollection
         services.AddScoped<IContractSignatureVerifier, ContractSignatureVerifier>();
         services.AddScoped<ICompanyCategoryRepository, CompanyCategoryRepository>();
         services.AddHttpClient<IAccessHttpClient, AccessHttpClient>();
+        services.AddScoped<IDiaryEntryRepository, DiaryEntryRepository>();
         return services;
     }
 }

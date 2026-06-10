@@ -197,10 +197,18 @@ public class ContractRepository(InternshipPracticeDbContext dbContext): IContrac
                         "Студент для текущего пользователя не найден"));
             }
             
-            
+            var allowedApplicationStatuses = new[]
+            {
+                "approved",
+                "contract_signed"
+            };
+
             var query = dbContext.Contracts
                 .AsNoTracking()
-                .Where(c => c.Application.StudentId == studentId);
+                .Where(c =>
+                    c.Application.StudentId == studentId &&
+                    c.Application.DeletedAt == null &&
+                    allowedApplicationStatuses.Contains(c.Application.ApplicationStatus.Code));
 
             var totalCount = await query.CountAsync();
 
@@ -252,8 +260,19 @@ public class ContractRepository(InternshipPracticeDbContext dbContext): IContrac
             page = page < 1 ? 1 : page;
             pageSize = pageSize is < 1 or > 100 ? 5 : pageSize;
             
+            
+            var allowedApplicationStatuses = new[]
+            {
+                "approved",
+                "contract_signed"
+            };
+
             var query = dbContext.Contracts
-                .AsNoTracking();
+                .AsNoTracking()
+                .Where(c =>
+                    c.Application.DeletedAt == null &&
+                    allowedApplicationStatuses.Contains(c.Application.ApplicationStatus.Code));
+
 
             var totalCount = await query.CountAsync();
 
@@ -450,10 +469,18 @@ public class ContractRepository(InternshipPracticeDbContext dbContext): IContrac
                 return Result.Failure<int>(new Error(Domain.Common.Error.NotFound, "Статус договора fully_signed не найден"));
             }
             
+            var allowedApplicationStatuses = new[]
+            {
+                "approved",
+                "contract_signed"
+            };
+            
             var count = await dbContext.Contracts
                 .Include(c => c.Application)
                 .ThenInclude(a => a.Student)
-                .Where(x => x.StatusId == contractStatusId && x.Application.Student.UserId == userId)
+                .Where(x => x.StatusId == contractStatusId && x.Application.Student.UserId == userId &&
+                            x.Application.DeletedAt == null &&
+                            allowedApplicationStatuses.Contains(x.Application.ApplicationStatus.Code))
                 .CountAsync();
             return count;
         }
@@ -503,11 +530,19 @@ public class ContractRepository(InternshipPracticeDbContext dbContext): IContrac
                 return Result.Failure<int>(new Error(Domain.Common.Error.NotFound, "Статус договора waiting_university_sign не найден"));
             }
             
+            var allowedApplicationStatuses = new[]
+            {
+                "approved",
+                "contract_signed"
+            };
+            
             var count = await dbContext.Contracts
                 .Include(c => c.Application)
                 .ThenInclude(a => a.Student)
                 .Where(x => (x.StatusId == contractStatusWaitingStudentSignId || 
-                             x.StatusId == contractStatusWaitingEmployerSignId || x.StatusId == contractStatusWaitingUniversitySignId) && x.Application.Student.UserId == userId)
+                             x.StatusId == contractStatusWaitingEmployerSignId || x.StatusId == contractStatusWaitingUniversitySignId) && x.Application.Student.UserId == userId  &&
+                            x.Application.DeletedAt == null &&
+                            allowedApplicationStatuses.Contains(x.Application.ApplicationStatus.Code))
                 .CountAsync();
             return count;
         }
@@ -533,10 +568,18 @@ public class ContractRepository(InternshipPracticeDbContext dbContext): IContrac
                 return Result.Failure<int>(new Error(Domain.Common.Error.NotFound, "Статус договора completed не найден"));
             }
             
+            var allowedApplicationStatuses = new[]
+            {
+                "approved",
+                "contract_signed"
+            };
+            
             var count = await dbContext.Contracts
                 .Include(c => c.Application)
                 .ThenInclude(a => a.Student)
-                .Where(x => x.StatusId == contractStatusId && x.Application.Student.UserId == userId)
+                .Where(x => x.StatusId == contractStatusId && x.Application.Student.UserId == userId  &&
+                            x.Application.DeletedAt == null &&
+                            allowedApplicationStatuses.Contains(x.Application.ApplicationStatus.Code))
                 .CountAsync();
             return count;
         }
