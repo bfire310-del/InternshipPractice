@@ -7,4 +7,5 @@ public interface IStudentRepository
 {
     Task<Result<List<StudentResponse>>> GetAll();
     Task<Result<List<StudentResponse>>> GetStudentsByCareerUserId(Guid userId);
+    Task<Result<List<CareerStudentApplicationResponse>>> GetStudentApplicationsByCareerUserId(Guid userId);
 }

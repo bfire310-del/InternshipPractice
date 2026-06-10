@@ -10,4 +10,5 @@ public interface IDiaryEntryRepository
     Task<Result> CreateOrUpdateDiaryEntry(
         Guid userId,
         CreateDiaryEntryRequest request);
+    Task<Result<CareerDiaryDetailsResponse>> GetDiaryDetails(Guid careerUserId, Guid studentId);
 }

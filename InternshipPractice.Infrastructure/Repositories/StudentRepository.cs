@@ -65,4 +65,59 @@ public class StudentRepository(InternshipPracticeDbContext dbContext): IStudentR
             new Error(Domain.Common.Error.InternalServerError, ex.Message));
         }
     }
+
+    public async Task<Result<List<CareerStudentApplicationResponse>>> GetStudentApplicationsByCareerUserId(Guid userId)
+    {
+        try
+        {
+            var applications = await dbContext.Applications
+     .Where(a => dbContext.CareerCenters
+         .Any(cc =>
+             cc.UserId == userId &&
+             cc.UniversityId == a.Student.Faculty.UniversityId))
+     .Select(a => new
+     {
+         StudentId = a.Student.UserId,
+         StudentLastName = a.Student.User.LastName,
+         StudentFirstName = a.Student.User.FirstName,
+         FacultyName = a.Student.Faculty.NameRu,
+         CompanyName = a.Vacancy.Employer.Company.CompanyNameRu,
+         StartDate = a.Vacancy.StartDate,
+         EndDate = a.Vacancy.EndDate,
+         StatusName = a.ApplicationStatus.NameRu,
+         CreatedDate = a.CreatedAt
+     })
+     .ToListAsync();
+
+            var result = applications
+                .GroupBy(x => x.StudentId)
+                .Select(g => g
+                    .OrderByDescending(x => x.CreatedDate)
+                    .First())
+                .Select(a => new CareerStudentApplicationResponse
+                {
+                    StudentId = a.StudentId,
+                    StudentFullName = $"{a.StudentLastName} {a.StudentFirstName}",
+                    FacultyName = a.FacultyName,
+                    CompanyName = a.CompanyName,
+                    Period = $"{FormatDate(a.StartDate)} - {FormatDate(a.EndDate)}",
+                    StatusName = a.StatusName
+                })
+                .ToList();
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<List<CareerStudentApplicationResponse>>(
+                new Error(Domain.Common.Error.InternalServerError, ex.Message));
+        }
+    }
+
+    private static string FormatDate(DateOnly? date)
+    {
+        return date.HasValue
+            ? date.Value.ToString("dd.MM.yyyy")
+            : "-";
+    }
 }

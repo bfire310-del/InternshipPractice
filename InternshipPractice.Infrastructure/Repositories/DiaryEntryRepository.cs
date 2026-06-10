@@ -136,4 +136,88 @@ public class DiaryEntryRepository(InternshipPracticeDbContext dbContext): IDiary
                     $"Ошибка при сохранении записи дневника: {ex.Message}"));
         }
     }
+
+    public async Task<Result<CareerDiaryDetailsResponse>> GetDiaryDetails(Guid careerUserId,Guid studentId)
+    {
+        try
+        {
+            var application = await dbContext.Applications
+                .Where(a =>
+                    a.Student.UserId == studentId &&
+                    dbContext.CareerCenters.Any(cc =>
+                        cc.UserId == careerUserId &&
+                        cc.UniversityId == a.Student.Faculty.UniversityId))
+                .Select(a => new
+                {
+                    ApplicationId = a.ApplicationId,
+
+                    StudentId = a.Student.UserId,
+                    StudentLastName = a.Student.User.LastName,
+                    StudentFirstName = a.Student.User.FirstName,
+
+                    FacultyName = a.Student.Faculty.NameRu,
+
+                    CompanyName = a.Vacancy.Employer.Company.CompanyNameRu,
+
+                    StartDate = a.Vacancy.StartDate,
+                    EndDate = a.Vacancy.EndDate,
+
+                    StatusName = a.ApplicationStatus.NameRu
+                })
+                .FirstOrDefaultAsync();
+
+            if (application is null)
+            {
+                return Result.Failure<CareerDiaryDetailsResponse>(
+                    new Error(Domain.Common.Error.NotFound, "Дневник не найден"));
+            }
+
+            var entries = await dbContext.DiaryEntries
+                .Where(d => d.ApplicationId == application.ApplicationId)
+                .OrderByDescending(d => d.CreatedAt)
+                .Select(d => new CareerDiaryEntryResponse
+                {
+                    DiaryId = d.DiaryEntryId,
+                    Date = DateOnly.FromDateTime(d.CreatedAt.Value),
+                    Task = d.TaskName,
+                    Description = d.Description,
+                    PresenceStatusName = d.Attendance
+                })
+                .ToListAsync();
+
+            var result = new CareerDiaryDetailsResponse
+            {
+                StudentId = application.StudentId,
+
+                StudentFullName =
+                    application.StudentLastName + " " +
+                    application.StudentFirstName,
+
+                FacultyName = application.FacultyName,
+
+                CompanyName = application.CompanyName,
+
+                Period =
+                    $"{FormatDate(application.StartDate)} - {FormatDate(application.EndDate)}",
+
+                StatusName = application.StatusName,
+
+                Entries = entries
+            };
+
+            return result;
+        }
+        catch (Exception ex)
+        {
+            return Result.Failure<CareerDiaryDetailsResponse>(
+                new Error(Domain.Common.Error.InternalServerError, ex.Message));
+        }
+    }
+
+    private static string FormatDate(DateOnly? date)
+    {
+        return date.HasValue
+            ? date.Value.ToString("dd.MM.yyyy")
+            : "-";
+    }
 }
