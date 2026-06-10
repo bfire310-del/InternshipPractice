@@ -19,7 +19,9 @@ public class AccessController : BaseController
         return Ok(new
         {
             token = result.Value.Item1,
-            roleCode = result.Value.Item2
+            roleCode = result.Value.Item2,
+            firstName = result.Value.Item3,
+            lastName = result.Value.Item4
         });
     }
 }
