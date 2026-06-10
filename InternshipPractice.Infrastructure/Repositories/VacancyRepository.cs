@@ -520,6 +520,7 @@ public class VacancyRepository(InternshipPracticeDbContext dbContext): IVacancyR
         {
             await dbContext.AddAsync(new Vacancy
             {
+                VacancyId = Guid.NewGuid(),
                 EmployerId = request.EmployerId,
                 NameRu = request.NameRu,
                 ShortDescription = request.ShotrDescription,
