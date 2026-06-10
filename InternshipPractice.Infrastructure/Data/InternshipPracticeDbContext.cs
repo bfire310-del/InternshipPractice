@@ -870,8 +870,9 @@ public partial class InternshipPracticeDbContext : DbContext
             entity.ToTable("vacancies");
 
             entity.Property(e => e.VacancyId)
-                .ValueGeneratedNever()
+                .ValueGeneratedOnAdd()
                 .HasColumnName("vacancy_id");
+            
             entity.Property(e => e.Address)
                 .HasMaxLength(300)
                 .HasColumnName("address");
